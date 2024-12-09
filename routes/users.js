@@ -86,7 +86,6 @@ router.post('/signup', (req, res) => {
 
 router.post('/signin', (req, res) => {
 
-  res.json({ result: process.env.CONNECTION_STRING });
 
   if (!checkBody(req.body, ['email', 'password'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
