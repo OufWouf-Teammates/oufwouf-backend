@@ -19,6 +19,7 @@ async function middlewareCheckToken(req, res, next) {
   try {
     // Récupérer le token depuis l'en-tête Authorization
     const token = req.headers.authorization?.split(' ')[1]; // Format "Bearer <token>"
+
     if (!token) {
       res.json({ result: false, error: 'Token error.' });
       return;
