@@ -1,4 +1,5 @@
 var express = require('express');
+const appleSignin = require('apple-signin-auth');
 var router = express.Router();
 
 const User = require('../models/user');
@@ -152,5 +153,25 @@ router.delete('/:token', async (req, res) => {
 //   }
 // });
 
+// ROUTE APPLE CONNECTION 
+app.post('/api/auth/apple', async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    // Vérification du token d'Apple
+    const response = await appleSignin.verifyIdToken(token, {
+      audience: 'com.your.app',  // Remplacez par votre client ID
+      ignoreExpiration: true      // Pour ignorer l'expiration (si vous gérez ça manuellement)
+    });
+
+    // Récupérer les informations de l'utilisateur
+    console.log('User verified:', response);
+    res.json({ result: true, user: response });
+
+  } catch (error) {
+    console.error('Apple sign-in verification error:', error);
+    res.status(400).json({ result: false, error: 'Token verification failed' });
+  }
+});
 
 module.exports = router;
