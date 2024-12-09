@@ -71,7 +71,9 @@ router.post('/signup', (req, res) => {
         tokenCreationDate : new Date()
       });
 
-      newUser.save()
+      newUser.save().then(data => {
+        res.json({ result: true, data });
+      });
 
       
     } else {
