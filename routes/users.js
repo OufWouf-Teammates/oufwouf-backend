@@ -19,6 +19,7 @@ async function middlewareCheckToken(req, res, next) {
   try {
     // Récupérer le token depuis l'en-tête Authorization
     const token = req.headers.authorization?.split(' ')[1]; // Format "Bearer <token>"
+
     if (!token) {
       res.json({ result: false, error: 'Token error.' });
       return;
@@ -71,11 +72,10 @@ router.post('/signup', (req, res) => {
         tokenCreationDate : new Date()
       });
 
-      newUser.save()
-      .then(newDoc => {
-        res.json({ result: true, data: newDoc});
-      })
-      .catch(error => console.error(error));
+      newUser.save().then(data => {
+        res.json({ result: true, data });
+      });
+
       
     } else {
       // User already exists in database
@@ -100,21 +100,16 @@ router.post('/signin', (req, res) => {
     .then(user => {
       if (user && bcrypt.compareSync(req.body.password, user.password)) {
         user.token = uid2(32);
-        return user.save();
+         user.save().then(data => {
+          res.json({ result: true, data });
+        });
+         return;
       } else {
         res.json({ result: false, error: 'User not found or wrong password' });
-        return Promise.reject('No further actions'); // Arrêter la chaîne
-      }
-    })
-    .then(data => {
-      if (data) {
-        res.json({ result: true, data });
       }
     })
     .catch(error => {
-      if (error !== 'No further actions') {
         res.status(500).json({ result: false, error: 'Internal server error' });
-      }
     });
 });
 
@@ -190,5 +185,10 @@ router.post('/api/auth/apple', async (req, res) => {
     res.status(400).json({ result: false, error: 'Token verification failed' });
   }
 });
+
+router.get('/isConnectedOrNot', middlewareCheckToken, (req, res, next) => {
+  res.json({ result: true });
+
+})
 
 module.exports = router;
