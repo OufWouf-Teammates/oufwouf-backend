@@ -7,6 +7,8 @@ const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 const TOKEN_VALIDITY_DAYS = 90;
+const fs = require('fs');
+const path = require('path');
 
 
 
@@ -154,14 +156,18 @@ router.delete('/:token', async (req, res) => {
 // });
 
 // ROUTE APPLE CONNECTION 
+// Charger la clé privée depuis le fichier .p8
+const privateKey = fs.readFileSync(path.join(__dirname, 'AuthKey_GV7A3M6663.p8'), 'utf8');
+
 app.post('/api/auth/apple', async (req, res) => {
   const { token } = req.body;
 
   try {
     // Vérification du token d'Apple
     const response = await appleSignin.verifyIdToken(token, {
-      audience: 'com.your.app',  // Remplacez par votre client ID
-      ignoreExpiration: true      // Pour ignorer l'expiration (si vous gérez ça manuellement)
+      audience: 'com.your.app',  // Remplacez par ton client ID
+      ignoreExpiration: true,      // Si tu gères l'expiration manuellement
+      privateKey: privateKey,      // Fournir la clé privée pour vérifier le token
     });
 
     // Récupérer les informations de l'utilisateur
