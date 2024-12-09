@@ -71,6 +71,8 @@ router.post('/signup', (req, res) => {
         tokenCreationDate : new Date()
       });
 
+      newUser.save()
+
       
     } else {
       // User already exists in database
