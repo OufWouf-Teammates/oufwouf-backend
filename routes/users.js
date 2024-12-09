@@ -59,7 +59,7 @@ router.post('/signup', (req, res) => {
 
   // Vérification si l'utilisateur a déjà un compte
   User.findOne({ email: req.body.email }).then(data => {
-    if (data === null) {
+    if (!data) {
       //Decoupage 10 fois du mot de passe
       const hash = bcrypt.hashSync(req.body.password, 10);
 
@@ -71,9 +71,12 @@ router.post('/signup', (req, res) => {
         tokenCreationDate : new Date()
       });
 
-      newUser.save().then(newDoc => {
-        res.json({ result: true, user: newDoc});
-      });
+      newUser.save()
+      .then(newDoc => {
+        res.json({ result: true, data: newDoc});
+      })
+      .catch(error => console.error(error));
+      
     } else {
       // User already exists in database
       res.json({ result: false, error: 'User already exists' });
