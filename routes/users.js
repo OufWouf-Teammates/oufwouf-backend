@@ -7,6 +7,7 @@ const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 const TOKEN_VALIDITY_DAYS = 90;
+
 const fs = require('fs');
 const path = require('path');
 
@@ -83,13 +84,13 @@ router.post('/signup', (req, res) => {
 
 //Route POST de la connection
 router.post('/signin', async (req, res) => {
-  if (!checkBody(req.body, ['username', 'password'])) {
+  if (!checkBody(req.body, ['email', 'password'])) {
    res.json({ result: false, error: 'Missing or empty fields' });
   }
 
   try {
     // Rechercher l'utilisateur
-    const user = await User.findOne({ username: req.body.username });
+    const user = await User.findOne({ email: req.body.email });
 
     if (user && bcrypt.compareSync(req.body.password, user.password)) {
       // Générer un nouveau token
@@ -157,9 +158,10 @@ router.delete('/:token', async (req, res) => {
 
 // ROUTE APPLE CONNECTION 
 // Charger la clé privée depuis le fichier .p8
-const privateKey = fs.readFileSync(path.join(__dirname, 'AuthKey_GV7A3M6663.p8'), 'utf8');
+const pathToKey = path.join(__dirname, '..', 'config', 'AuthKey_GV7A3M6663.p8');
+const privateKey = fs.readFileSync(pathToKey, 'utf8');
 
-app.post('/api/auth/apple', async (req, res) => {
+router.post('/api/auth/apple', async (req, res) => {
   const { token } = req.body;
 
   try {
