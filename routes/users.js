@@ -81,31 +81,36 @@ router.post('/signup', (req, res) => {
   });
 });
 
-//Route POST de la connection
-router.post('/signin', async (req, res) => {
+
+
+
+router.post('/signin', (req, res) => {
   if (!checkBody(req.body, ['email', 'password'])) {
-   res.json({ result: false, error: 'Missing or empty fields' });
+    res.json({ result: false, error: 'Missing or empty fields' });
+    return;
   }
 
-  try {
-    // Rechercher l'utilisateur
-    const user = await User.findOne({ email: req.body.email });
 
-    if (user && bcrypt.compareSync(req.body.password, user.password)) {
-      // Générer un nouveau token
-      user.token = uid2(32);
-
-      // Sauvegarder l'utilisateur avec le nouveau token
-      await user.save();
-
-       res.json({ result: true, user });
-    } else {
-     res.json({ result: false, error: 'User not found or wrong password' });
-    }
-  } catch (error) {
-    console.error('Error during signin:', error);
-   res.status(500).json({ result: false, error: 'Internal server error' });
-  }
+  User.findOne({ email: req.body.email })
+    .then(user => {
+      if (user && bcrypt.compareSync(req.body.password, user.password)) {
+        user.token = uid2(32);
+        return user.save();
+      } else {
+        res.json({ result: false, error: 'User not found or wrong password' });
+        return Promise.reject('No further actions'); // Arrêter la chaîne
+      }
+    })
+    .then(data => {
+      if (data) {
+        res.json({ result: true, data });
+      }
+    })
+    .catch(error => {
+      if (error !== 'No further actions') {
+        res.status(500).json({ result: false, error: 'Internal server error' });
+      }
+    });
 });
 
 
