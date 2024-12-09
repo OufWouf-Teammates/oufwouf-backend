@@ -188,4 +188,9 @@ router.post('/api/auth/apple', async (req, res) => {
   }
 });
 
+router.get('/isConnectedOrNot', middlewareCheckToken, (req, res, next) => {
+  res.json({ result: true });
+
+})
+
 module.exports = router;
