@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema({
-  username: String,
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   bookmarks: Array,
   token: String,
+  tokenCreationDate: Date,
   dogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dog" }],
 });
 
