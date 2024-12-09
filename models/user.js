@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
  password: String,
  bookmarks: Array,
  token: String,
- tokenCreationDate: Date
+ tokenCreationDate: Date,
 });
 
 const User = mongoose.model('users', userSchema);
