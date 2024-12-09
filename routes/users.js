@@ -52,19 +52,18 @@ async function middlewareCheckToken(req, res, next) {
 
 //Route POST SIGNUP pour l'inscription
 router.post('/signup', (req, res) => {
-  if (!checkBody(req.body, ['username', 'password'])) {
+  if (!checkBody(req.body, ['email', 'password'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
 
   // Vérification si l'utilisateur a déjà un compte
-  User.findOne({ username: req.body.username }).then(data => {
+  User.findOne({ email: req.body.email }).then(data => {
     if (data === null) {
       //Decoupage 10 fois du mot de passe
       const hash = bcrypt.hashSync(req.body.password, 10);
 
       const newUser = new User({
-        username: req.body.username,
         email: req.body.email,
         password: hash,
         bookmarks: [],
