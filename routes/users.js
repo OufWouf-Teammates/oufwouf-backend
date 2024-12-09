@@ -99,21 +99,16 @@ router.post('/signin', (req, res) => {
     .then(user => {
       if (user && bcrypt.compareSync(req.body.password, user.password)) {
         user.token = uid2(32);
-        return user.save();
+         user.save().then(data => {
+          res.json({ result: true, data });
+        });
+         return;
       } else {
         res.json({ result: false, error: 'User not found or wrong password' });
-        return Promise.reject('No further actions'); // Arrêter la chaîne
-      }
-    })
-    .then(data => {
-      if (data) {
-        res.json({ result: true, data });
       }
     })
     .catch(error => {
-      if (error !== 'No further actions') {
         res.status(500).json({ result: false, error: 'Internal server error' });
-      }
     });
 });
 
