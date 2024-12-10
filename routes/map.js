@@ -167,4 +167,55 @@ router.post("/recherche/:localisation", async (req, res, next) => {
     }
 });
 
+//Route pour afficher les infotmations d'un lieu avec google places
+router.get("/lieu/:localisation/:nom", async (req, res, next) => {
+    const [lat, lon] = req.params.localisation.split(",");
+    const nom = req.params.nom.toLowerCase();
+    const apiKey = process.env.API_KEY;
+
+    if (!apiKey) {
+        return res.status(500).json({ result: false, error: 'API key missing' });
+    }
+
+    if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
+        return res.status(400).json({ result: false, error: 'Invalid or missing coordinates' });
+    }
+    if (!nom) {
+        return res.status(400).json({ result: false, error: 'Place name is required' });
+    }
+
+    try {
+        // Requête à l'API Text Search
+        const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(nom)}&location=${lat},${lon}&radius=5000&key=${apiKey}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch data from Google Maps API. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Vérifie si des résultats sont disponibles
+        if (data.results && data.results.length > 0) {
+            // Optionnel : récupérer plus de détails pour le premier lieu trouvé
+            const placeId = data.results[0].place_id;
+            const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}`;
+            const detailsResponse = await fetch(placeDetailsUrl);
+            const detailsData = await detailsResponse.json();
+
+            if (detailsData.status === 'OK') {
+                return res.status(200).json({ result: true, data: detailsData.result });
+            }
+
+            // Si les détails ne sont pas disponibles, retourne simplement les résultats
+            res.status(200).json({ result: true, data: data.results });
+        } else {
+            throw new Error('No results found');
+        }
+    } catch (error) {
+        console.error("Search error:", error);
+        res.status(400).json({ result: false, error: error.message || 'Search failed' });
+    }
+});
+
 module.exports = router;
