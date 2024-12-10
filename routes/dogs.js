@@ -1,24 +1,27 @@
-var express = require("express");
-var router = express.Router();
-var Dog = require("../models/dog");
-var User = require("../models/user");
+var express = require("express")
+var router = express.Router()
+var Dog = require("../models/dog")
+var User = require("../models/user")
+
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
+const { findToken } = require("../modules/findToken")
 
 /* Route GET pour recuperer les infos du chiens */
-router.get("/", async (req, res, next) => {
-  const token = req.query.token;
+router.get("/", middlewareCheckToken, async (req, res, next) => {
+  const token = req.headers.authorization
   try {
-    const user = await User.findOne({ token: token }).populate("dogs");
+    const user = await User.findOne({ token: token }).populate("dogs")
 
-    res.json({ result: true, dog: user.dogs });
+    res.json({ result: true, dog: user.dogs })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ result: false, error: "erreur serveur" });
+    console.error(error)
+    res.status(500).json({ result: false, error: "erreur serveur" })
   }
-});
+})
 
 // Route Post pour créer un nouveua chien à l'utilisateur
-router.post("/", async (req, res, next) => {
-  const token = req.body.token;
+router.post("/", middlewareCheckToken, async (req, res, next) => {
+  const token = req.headers.authorization
   try {
     const newDog = new Dog({
       name: req.body.name,
@@ -29,20 +32,20 @@ router.post("/", async (req, res, next) => {
       infos: req.body.infos,
       personality: req.body.personality,
       vaccins: req.body.vaccinId, //il faut envoyer un tableau des ids de vaccins
-    });
+    })
 
-    const save = await newDog.save();
+    const save = await newDog.save()
 
     const update = await User.updateOne(
       { token: token },
       { $addToSet: { dogs: save._id } }
-    );
+    )
 
-    res.json({ result: true, dog: save });
+    res.json({ result: true, dog: save })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ result: false, error: "erreur serveur" });
+    console.error(error)
+    res.status(500).json({ result: false, error: "erreur serveur" })
   }
-});
+})
 
-module.exports = router;
+module.exports = router
