@@ -45,6 +45,7 @@ async function middlewareCheckToken(req, res, next) {
     next();
   } catch (error) {
     res.json({ result: false, error: 'Token error.' });
+    return;
   }
 };
 
