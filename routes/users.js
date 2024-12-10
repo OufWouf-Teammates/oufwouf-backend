@@ -60,8 +60,6 @@ router.post('/signin', (req, res) => {
     return;
   }
 
-  console.log({ email: req.body.email });
-
   User.findOne({ email: req.body.email })
     .then(user => {
       if (user && bcrypt.compareSync(req.body.password, user.password)) {
