@@ -15,6 +15,7 @@ var dogsRouter = require("./routes/dogs")
 var vaccinGenerauxRouter = require("./routes/vaccinGeneraux")
 var vaccinsPersosRouter = require("./routes/vaccinsPersos")
 var raceRouter = require("./routes/races")
+var mapRouter= require("./routes/map")
 
 var app = express()
 
@@ -31,5 +32,6 @@ app.use("/dogs", dogsRouter)
 app.use("/vaccinsGeneraux", vaccinGenerauxRouter)
 app.use("/vaccinsPersos", vaccinsPersosRouter)
 app.use("/races", raceRouter)
+app.use("/map", mapRouter);
 
 module.exports = app
