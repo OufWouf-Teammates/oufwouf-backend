@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   email: String,
@@ -6,9 +6,9 @@ const userSchema = new mongoose.Schema({
   bookmarks: Array,
   token: String,
   tokenCreationDate: Date,
+  dogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dog" }],
 });
 
-// Le modèle 'User' correspondra automatiquement à la collection 'users' (nom au pluriel)
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("users", userSchema);
 
 module.exports = User;
