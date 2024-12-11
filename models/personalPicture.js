@@ -1,12 +1,12 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const pictureSchema = new mongoose.Schema({
-    Description : String,
-    ImageUri : String,
-    Latitude : Number,
-    Longitude : Number,
-})
+  description: String,
+  imageUri: String,
+  latitude: Number,
+  longitude: Number,
+});
 
-const Picture = mongoose.model('pictures', pictureSchema )
+const Picture = mongoose.model("pictures", pictureSchema);
 
-module.exports = Picture
+module.exports = Picture;
