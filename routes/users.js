@@ -6,7 +6,6 @@ const User = require('../models/user');
 const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
-const TOKEN_VALIDITY_DAYS = 90;
 
 const fs = require('fs');
 const path = require('path');
