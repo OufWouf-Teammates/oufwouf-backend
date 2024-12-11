@@ -142,7 +142,7 @@ router.post('/api/auth/apple', async (req, res, next) => {
     } else {
       // Rediriger vers /signup
       const password = uid2(16); // Générer un mot de passe aléatoire
-      return fetch(`${BACKEND_URL}signup`, {
+      return fetch(`${BACKEND_URL}users/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({email: emailApple,password}),
