@@ -26,7 +26,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
   console.log('jai commencé la route')
 
   try {
-    const data = JSON.parse(req.files?.data)
+    const data = JSON.parse(req.body.data)
     const uri = req.files?.cloudinary_url
     const newDog = new Dog({
       name: data.name,
