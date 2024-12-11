@@ -93,7 +93,28 @@ router.post("/parcs-chiens/:localisation", async (req, res, next) => {
         }
 
         const data = await response.json();
-        res.status(200).json({ result: true, data: data });
+
+        // Extraire les coordonnées des résultats
+        const parks = data.elements.map(element => {
+            let parkCoordinates = [];
+            let parkName = element.tags ? element.tags.name : "Unnamed Park"; // Nom du parc ou valeur par défaut
+
+            if (element.type === "node") {
+                parkCoordinates = [element.lat, element.lon];
+            } else if (element.type === "way" || element.type === "relation") {
+                // Pour les ways et relations, les coordonnées sont généralement dans les nodes
+                parkCoordinates = element.geometry ? element.geometry.map(geo => [geo.lat, geo.lon]) : [];
+            }
+
+            return {
+                id: element.id,
+                type: element.type,
+                coordinates: parkCoordinates,
+                name: parkName // Ajouter le nom du parc
+            };
+        });
+
+        res.status(200).json({ result: true, data: parks });
     } catch (error) {
         console.log("Search error:", error);
         res.status(400).json({ result: false, error: 'Search failed' });
