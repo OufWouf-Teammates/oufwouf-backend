@@ -13,18 +13,35 @@ const path = require('path');
 const { middlewareCheckToken } = require('../modules/middlewareCheckToken');
 const { findToken } = require('../modules/findToken');
 
+const { validateAppleToken } = require('../modules/validateAppleToken');
+
+function connectToUser(req,res,next) {
+  User.findOne({ email: req.body.email })
+  .then(user => {
+    if(user) {
+      user.token = uid2(32);
+      user.save().then(data => {
+       res.json({ result: true, data });
+     });
+    } else {
+      res.status(500).json({ result: false, error: 'Internal server error 9' });
+    }
+})
+  .catch(error => {
+      res.status(500).json({ result: false, error: 'Internal server error 9' });
+  });
+}
+
 
 //Route POST SIGNUP pour l'inscription
-router.post('/signup', (req, res) => {
+router.post('/signup', (req, res, next) => {
   if (!checkBody(req.body, ['email', 'password'])) {
-    res.json({ result: false, error: 'Missing or empty fields' });
-    return;
+    return res.json({ result: false, error: 'Missing or empty fields' });
   }
 
   // Vérification si l'utilisateur a déjà un compte
   User.findOne({ email: req.body.email }).then(data => {
     if (!data) {
-      //Decoupage 10 fois du mot de passe
       const hash = bcrypt.hashSync(req.body.password, 10);
 
       const newUser = new User({
@@ -32,26 +49,24 @@ router.post('/signup', (req, res) => {
         password: hash,
         bookmarks: [],
         token: uid2(32),
-        tokenCreationDate : new Date(),
-        dogs: []
+        tokenCreationDate: new Date(),
+        dogs: [],
       });
 
-      newUser.save().then(data => {
-        res.json({ result: true, data });
-      });
-
-      
+      newUser.save().then(() => next());
     } else {
-      // User already exists in database
       res.json({ result: false, error: 'User already exists' });
     }
+  }).catch(error => {
+    console.error('Erreur lors de l’inscription:', error.message);
+    res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
   });
-});
+}, connectToUser);
 
 
 
 
-router.post('/signin', (req, res) => {
+router.post('/signin', (req,res,next) => {
 
 
   if (!checkBody(req.body, ['email', 'password'])) {
@@ -62,11 +77,8 @@ router.post('/signin', (req, res) => {
   User.findOne({ email: req.body.email })
     .then(user => {
       if (user && bcrypt.compareSync(req.body.password, user.password)) {
-        user.token = uid2(32);
-         user.save().then(data => {
-          res.json({ result: true, data });
-        });
-         return;
+        req.body.email = user.email; // Injecter l'email pour `connectToUser`
+        next();
       } else {
         res.json({ result: false, error: 'User not found or wrong password' });
       }
@@ -74,7 +86,7 @@ router.post('/signin', (req, res) => {
     .catch(error => {
         res.status(500).json({ result: false, error: 'Internal server error 1' });
     });
-});
+},connectToUser);
 
 
 
@@ -101,53 +113,96 @@ router.delete('/:token', async (req, res) => {
 });
 
 
-// EXEMPLE DE ROUTE MIDDLEWARE
-// router.get('/userInfo/:id', middlewareCheckToken, async (req, res, next) => {
-//   const {objectid} = req.params.id;
-
-//   try {
-//     // Suppression de l'utilisateur avec le token
-//     const result = await User.findOne({ _ObjectId: objectid });
-
-//     if (result) {
-//       // Aucun document supprimé
-//      res.status(200).json({ result: true, data: result });
-//     } else{
-//      res.status(404).json({ result: false });
-//     }
-
-//   } catch (error) {
-//     // Gestion des erreurs
-//     console.error('Error user', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }s
-// });
-
-// ROUTE APPLE CONNECTION 
-// Charger la clé privée depuis le fichier .p8
-router.post('/api/auth/apple', async (req, res) => {
-const pathToKey = path.join(__dirname, '..', 'config', 'AuthKey_GV7A3M6663.p8');
-const privateKey = fs.readFileSync(pathToKey, 'utf8');
-
-  const { token } = req.body;
-
+router.post('/api/auth/apple', async (req, res, next) => {
   try {
-    // Vérification du token d'Apple
-    const response = await appleSignin.verifyIdToken(token, {
-      audience: 'com.your.app',  // Remplacez par ton client ID
-      ignoreExpiration: true,      // Si tu gères l'expiration manuellement
-      privateKey: privateKey,      // Fournir la clé privée pour vérifier le token
-    });
+    const { identityToken } = req.body;
 
-    // Récupérer les informations de l'utilisateur
-    console.log('User verified:', response);
-    res.json({ result: true, user: response });
+    if (!identityToken) {
+      console.error('Erreur : identityToken manquant.');
+      return res.status(400).json({ result: false, error: 'identityToken est requis.' });
+    }
 
+    // Étape 1 : Validation du token
+    let verifiedData;
+    try {
+      verifiedData = await validateAppleToken(identityToken);
+    } catch (err) {
+      console.error('Erreur lors de la validation du token Apple:', err.message);
+      return res.status(500).json({ result: false, error: 'Échec de la validation Apple.' });
+    }
+
+    const idApple = verifiedData.sub;
+    const emailApple = verifiedData.email || null;
+
+    console.log('Données vérifiées :', verifiedData);
+
+    // Étape 2 : Recherche de l'utilisateur dans la base
+    let user;
+    try {
+      user = await User.findOne({ $or: [{ email: emailApple }, { idApple }] });
+    } catch (err) {
+      console.error('Erreur lors de la recherche utilisateur :', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur de base de données.' });
+    }
+
+    // Étape 3 : L'utilisateur existe
+    if (user) {
+      if (!emailApple || user.email === emailApple) {
+        console.log('Utilisateur trouvé, connexion...');
+        req.body.email = user.email;
+        return next();
+      } else {
+        console.error('Erreur : incohérence des emails.');
+        return res.status(400).json({ result: false, error: 'Incohérence des emails.' });
+      }
+    }
+
+    // Étape 4 : L'utilisateur n'existe pas, inscription
+    if (!emailApple) {
+      console.error('Erreur : email non fourni par Apple.');
+      return res.status(400).json({
+        result: false,
+        error: 'Email non fourni par Apple, impossible de créer un compte.',
+      });
+    }
+
+    const password = uid2(16); // Générer un mot de passe aléatoire
+    let signupResponse;
+    try {
+      signupResponse = await fetch(`${process.env.BACKEND_URL}users/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailApple, password }),
+      });
+    } catch (err) {
+      console.error('Erreur lors de la requête vers /signup:', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur interne lors de la redirection vers /signup.' });
+    }
+
+    let signupData;
+    try {
+      signupData = await signupResponse.json();
+    } catch (err) {
+      console.error('Erreur lors du parsing de la réponse de /signup:', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur de réponse de /signup.' });
+    }
+
+    if (signupData.result) {
+      console.log('Inscription réussie, connexion...');
+      req.body.email = emailApple;
+      return next();
+    } else {
+      console.error('Erreur lors de l’inscription:', signupData.error || 'Inconnu');
+      return res.status(500).json({
+        result: false,
+        error: signupData.error || 'Erreur inconnue lors de l’inscription.',
+      });
+    }
   } catch (error) {
-    console.error('Apple sign-in verification error:', error);
-    res.status(400).json({ result: false, error: 'Token verification failed' });
+    console.error('Erreur inattendue :', error.message);
+    res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
   }
-});
+}, connectToUser);
 
 router.get('/isConnectedOrNot', middlewareCheckToken, (req, res, next) => {
   res.json({ result: true });

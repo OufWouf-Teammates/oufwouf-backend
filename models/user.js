@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   password: String,
   bookmarks: Array,
   token: String,
-  tokenApple: String,
+  idApple: String,
   tokenCreationDate: Date,
   dogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dog" }],
 });
