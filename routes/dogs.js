@@ -9,7 +9,7 @@ var { upload } = require("../modules/cloudinary")
 
 /* Route GET pour recuperer les infos du chiens */
 router.get("/", middlewareCheckToken, async (req, res, next) => {
-  const token = req.headers.authorization
+  const token = req.headers.authorization?.split(" ")[1]
   try {
     const user = await User.findOne({ token: token }).populate("dogs")
 
