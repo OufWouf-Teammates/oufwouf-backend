@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const pictureSchema = new mongoose.Schema({
   description: String,
-  imageUri: String,
+  uri: String,
   latitude: Number,
   longitude: Number,
 });

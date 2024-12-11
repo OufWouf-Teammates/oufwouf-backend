@@ -19,7 +19,6 @@ async function upload(req, res, next) {
     return res.json({ result: false, error: resultMove })
   }
 
-  next()
 }
 
 module.exports = { upload }
