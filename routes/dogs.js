@@ -22,7 +22,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 
 // Route Post pour créer un nouveua chien à l'utilisateur
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
-  const token = req.headers.authorization
+  const token = req.headers.authorization?.split(" ")[1]
 
   try {
     if (!token) {
