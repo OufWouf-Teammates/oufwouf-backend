@@ -35,7 +35,6 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
       birthday: data.birthday,
       infos: data.infos,
       personality: data.personality,
-      vaccins: data.vaccinId, //il faut envoyer un tableau des ids de vaccins
     })
 
     const save = await newDog.save()
