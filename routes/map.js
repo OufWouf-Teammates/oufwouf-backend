@@ -12,9 +12,9 @@ router.post("/boutiques/:localisation", async (req, res, next) => {
             body: "data=" + encodeURIComponent(`
                 [out:json][timeout:90];
                 (
-                    node["shop"="pet"](around:100000, ${lat}, ${lon}); 
-                    way["shop"="pet"](around:100000, ${lat}, ${lon});
-                    relation["shop"="pet"](around:100000, ${lat}, ${lon});
+                    node["shop"="pet"](around:5000, ${lat}, ${lon}); 
+                    way["shop"="pet"](around:5000, ${lat}, ${lon});
+                    relation["shop"="pet"](around:5000, ${lat}, ${lon});
                 );
                 out body qt;
                 >;
@@ -44,9 +44,9 @@ router.post("/veterinaires/:localisation", async (req, res, next) => {
             body: "data=" + encodeURIComponent(`
                 [out:json][timeout:90];
                 (
-                    node["amenity"="veterinary"](around:100000, ${lat}, ${lon});
-                    way["amenity"="veterinary"](around:100000, ${lat}, ${lon});
-                    relation["amenity"="veterinary"](around:100000, ${lat}, ${lon});
+                    node["amenity"="veterinary"](around:5000, ${lat}, ${lon});
+                    way["amenity"="veterinary"](around:5000, ${lat}, ${lon});
+                    relation["amenity"="veterinary"](around:5000, ${lat}, ${lon});
                 );
                 out body qt;
                 >;
@@ -78,9 +78,9 @@ router.post("/parcs-chiens/:localisation", async (req, res, next) => {
             body: "data=" + encodeURIComponent(`
                 [out:json][timeout:90];
                 (
-                    node["leisure"="park"]["dog"="yes"](around:100000, ${lat}, ${lon});
-                    way["leisure"="park"]["dog"="yes"](around:100000, ${lat}, ${lon});
-                    relation["leisure"="park"]["dog"="yes"](around:100000, ${lat}, ${lon});
+                    node["leisure"="park"]["dog"="yes"](around:5000, ${lat}, ${lon});
+                    way["leisure"="park"]["dog"="yes"](around:5000, ${lat}, ${lon});
+                    relation["leisure"="park"]["dog"="yes"](around:5000, ${lat}, ${lon});
                 );
                 out body qt;
                 >;
