@@ -1,3 +1,4 @@
+const TOKEN_VALIDITY_DAYS = 90;
 //ROUTE MIDDLEWARE VERIF VALIDITE TOKEN / DATE TOKEN
 async function middlewareCheckToken(req, res, next) {
     try {
