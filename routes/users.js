@@ -118,60 +118,89 @@ router.post('/api/auth/apple', async (req, res, next) => {
     const { identityToken } = req.body;
 
     if (!identityToken) {
+      console.error('Erreur : identityToken manquant.');
       return res.status(400).json({ result: false, error: 'identityToken est requis.' });
     }
 
-    // Valider le token Apple
-    const verifiedData = await validateAppleToken(identityToken);
+    // Étape 1 : Validation du token
+    let verifiedData;
+    try {
+      verifiedData = await validateAppleToken(identityToken);
+    } catch (err) {
+      console.error('Erreur lors de la validation du token Apple:', err.message);
+      return res.status(500).json({ result: false, error: 'Échec de la validation Apple.' });
+    }
+
     const idApple = verifiedData.sub;
     const emailApple = verifiedData.email || null;
 
     console.log('Données vérifiées :', verifiedData);
 
-    // Chercher l'utilisateur dans la base par idApple ou email
-    let user = await User.findOne({ $or: [{ email: emailApple }, { idApple }] });
+    // Étape 2 : Recherche de l'utilisateur dans la base
+    let user;
+    try {
+      user = await User.findOne({ $or: [{ email: emailApple }, { idApple }] });
+    } catch (err) {
+      console.error('Erreur lors de la recherche utilisateur :', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur de base de données.' });
+    }
 
+    // Étape 3 : L'utilisateur existe
     if (user) {
-      // Utilisateur trouvé : vérifier la cohérence de l'email
       if (!emailApple || user.email === emailApple) {
-        req.body.email = user.email; // Injecter l'email pour `connectToUser`
+        console.log('Utilisateur trouvé, connexion...');
+        req.body.email = user.email;
         return next();
       } else {
+        console.error('Erreur : incohérence des emails.');
         return res.status(400).json({ result: false, error: 'Incohérence des emails.' });
       }
-    } else {
-      // Utilisateur non trouvé : inscription
-      if (!emailApple) {
-        return res.status(400).json({
-          result: false,
-          error: 'Email non fourni par Apple, impossible de créer un compte.',
-        });
-      }
+    }
 
-      // Générer un mot de passe aléatoire pour l'inscription
-      const password = uid2(16);
+    // Étape 4 : L'utilisateur n'existe pas, inscription
+    if (!emailApple) {
+      console.error('Erreur : email non fourni par Apple.');
+      return res.status(400).json({
+        result: false,
+        error: 'Email non fourni par Apple, impossible de créer un compte.',
+      });
+    }
 
-      const signupResponse = await fetch(`${process.env.BACKEND_URL}users/signup`, {
+    const password = uid2(16); // Générer un mot de passe aléatoire
+    let signupResponse;
+    try {
+      signupResponse = await fetch(`${process.env.BACKEND_URL}users/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailApple, password }),
       });
+    } catch (err) {
+      console.error('Erreur lors de la requête vers /signup:', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur interne lors de la redirection vers /signup.' });
+    }
 
-      const signupData = await signupResponse.json();
+    let signupData;
+    try {
+      signupData = await signupResponse.json();
+    } catch (err) {
+      console.error('Erreur lors du parsing de la réponse de /signup:', err.message);
+      return res.status(500).json({ result: false, error: 'Erreur de réponse de /signup.' });
+    }
 
-      if (signupData.result) {
-        req.body.email = emailApple; // Injecter l'email pour `connectToUser`
-        return next();
-      } else {
-        return res.status(500).json({
-          result: false,
-          error: 'Erreur lors de la création du compte utilisateur.',
-        });
-      }
+    if (signupData.result) {
+      console.log('Inscription réussie, connexion...');
+      req.body.email = emailApple;
+      return next();
+    } else {
+      console.error('Erreur lors de l’inscription:', signupData.error || 'Inconnu');
+      return res.status(500).json({
+        result: false,
+        error: signupData.error || 'Erreur inconnue lors de l’inscription.',
+      });
     }
   } catch (error) {
-    console.error('Erreur lors de la validation Apple :', error.message);
-    return res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
+    console.error('Erreur inattendue :', error.message);
+    res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
   }
 }, connectToUser);
 
