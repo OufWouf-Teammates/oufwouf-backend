@@ -14,11 +14,8 @@
     "debug": "~2.6.9",
     "dotenv": "^16.4.7",
     "express": "~4.16.1",
-<<<<<<< HEAD
     "jsonwebtoken": "^9.0.2",
-=======
     "express-fileupload": "^1.5.1",
->>>>>>> b1346f264059c44cc6ab032d5209a8f0b0cbafda
     "mongoose": "^8.8.4",
     "morgan": "~1.9.1",
     "uid2": "^1.0.0",
