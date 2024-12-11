@@ -22,11 +22,11 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 
 // Route Post pour créer un nouveua chien à l'utilisateur
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
-  const token = req.headers.authorization  
-  console.log('jai commencé la route')
+  const token = req.headers.authorization
+  console.log("jai commencé la route")
 
   try {
-    const data = JSON.parse(req.files?.data)
+    const data = JSON.parse(req.body.data)
     const uri = req.files?.cloudinary_url
     const newDog = new Dog({
       name: data.name,
@@ -45,7 +45,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
       { token: token },
       { $addToSet: { dogs: save._id } }
     )
-    console.log('normalement tout est bon', save)
+    console.log("normalement tout est bon", save)
 
     res.json({ result: true, dog: save })
   } catch (error) {
