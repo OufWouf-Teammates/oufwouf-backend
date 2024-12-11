@@ -24,7 +24,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
   const token = req.headers.authorization
   try {
-    const data = JSON.parse(req.body?.data)
+    const data = JSON.parse(req.files?.data)
     const uri = req.files?.cloudinary_url
     const newDog = new Dog({
       name: data.name,
