@@ -127,7 +127,6 @@ router.post('/api/auth/apple', async (req, res, next) => {
 
     console.log('Données vérifiées :', verifiedData);
 
-    if(verifiedData.email === req.body.email) {
     // Vérifier si l'utilisateur existe avec l'email ou idApple
     let user = await User.findOne({ $or: [{ email: emailApple }, { idApple }] });
 
@@ -139,6 +138,12 @@ router.post('/api/auth/apple', async (req, res, next) => {
     res.status(500).json({ result: false, error: 'Email erreur Apple.' });
   }
   }
+   else {
+
+    let user = await User.findOne({ idApple });
+    if (user) {
+      req.body.email = user.email;
+      next();
     } else {
       // Rediriger vers /signup
       const password = uid2(16); // Générer un mot de passe aléatoire
@@ -154,6 +159,8 @@ router.post('/api/auth/apple', async (req, res, next) => {
           console.error('Erreur lors de la redirection vers /signup:', err.message);
           res.status(500).json({ result: false, error: 'Erreur lors de la redirection vers /signup' });
         });
+    }
+
     }
   } catch (error) {
     console.error('Erreur lors de la validation Apple :', error.message);
