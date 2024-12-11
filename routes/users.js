@@ -121,50 +121,57 @@ router.post('/api/auth/apple', async (req, res, next) => {
       return res.status(400).json({ result: false, error: 'identityToken est requis.' });
     }
 
+    // Valider le token Apple
     const verifiedData = await validateAppleToken(identityToken);
     const idApple = verifiedData.sub;
     const emailApple = verifiedData.email || null;
 
     console.log('Données vérifiées :', verifiedData);
 
-    // Vérifier si l'utilisateur existe avec l'email ou idApple
+    // Chercher l'utilisateur dans la base par idApple ou email
     let user = await User.findOne({ $or: [{ email: emailApple }, { idApple }] });
 
     if (user) {
-      req.body.email = user.email; // Injecter l'email pour `connectToUser`
-      if(verifiedData.email === req.body.email) {
-      next();
-  } else {
-    res.status(500).json({ result: false, error: 'Email erreur Apple.' });
-  }
-  }
-   else {
-
-    let user = await User.findOne({ idApple });
-    if (user) {
-      req.body.email = user.email;
-      next();
+      // Utilisateur trouvé : vérifier la cohérence de l'email
+      if (!emailApple || user.email === emailApple) {
+        req.body.email = user.email; // Injecter l'email pour `connectToUser`
+        return next();
+      } else {
+        return res.status(400).json({ result: false, error: 'Incohérence des emails.' });
+      }
     } else {
-      // Rediriger vers /signup
-      const password = uid2(16); // Générer un mot de passe aléatoire
-      return fetch(`${BACKEND_URL}users/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({email: emailApple,password}),
-      })
-        .then(response => {
-          res.json(response);
-        })
-        .catch(err => {
-          console.error('Erreur lors de la redirection vers /signup:', err.message);
-          res.status(500).json({ result: false, error: 'Erreur lors de la redirection vers /signup' });
+      // Utilisateur non trouvé : inscription
+      if (!emailApple) {
+        return res.status(400).json({
+          result: false,
+          error: 'Email non fourni par Apple, impossible de créer un compte.',
         });
-    }
+      }
 
+      // Générer un mot de passe aléatoire pour l'inscription
+      const password = uid2(16);
+
+      const signupResponse = await fetch(`${process.env.BACKEND_URL}users/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailApple, password }),
+      });
+
+      const signupData = await signupResponse.json();
+
+      if (signupData.result) {
+        req.body.email = emailApple; // Injecter l'email pour `connectToUser`
+        return next();
+      } else {
+        return res.status(500).json({
+          result: false,
+          error: 'Erreur lors de la création du compte utilisateur.',
+        });
+      }
     }
   } catch (error) {
     console.error('Erreur lors de la validation Apple :', error.message);
-    res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
+    return res.status(500).json({ result: false, error: 'Erreur interne du serveur.' });
   }
 }, connectToUser);
 
