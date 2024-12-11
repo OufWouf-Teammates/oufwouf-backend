@@ -23,8 +23,16 @@ async function validateAppleToken(identityToken) {
       throw new Error('Clé publique Apple introuvable pour le token.');
     }
 
+    console.log('Clé publique reçue :', key);
     // Étape 3 : Construire une clé publique utilisable à partir de 'jose'
-    const publicKey = JWK.asKey(key);
+    const publicKey = JWK.importKey(
+        {
+          kty: key.kty,
+          n: key.n,
+          e: key.e,
+        },
+        'json'
+      );
 
     // Étape 4 : Vérifier le token
     const verifiedToken = jwt.verify(identityToken, publicKey.toPEM(), {
