@@ -22,12 +22,20 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 
 // Route Post pour créer un nouveua chien à l'utilisateur
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
-  const token = req.headers.authorization  
-  console.log('jai commencé la route')
+  const token = req.headers.authorization
 
   try {
+    if (!token) {
+      return res.status(401).json({ result: false, error: "Token manquant" })
+    }
+    if (!req.body.data || !req.files) {
+      return res.status(400).json({ result: false, error: "Données invalides" })
+    }
+
     const data = JSON.parse(req.body.data)
     const uri = req.files?.cloudinary_url
+
+    //Creation du Chien
     const newDog = new Dog({
       name: data.name,
       uri: uri,
@@ -39,18 +47,19 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
       personality: data.personality,
     })
 
-    const save = await newDog.save()
+    const save = await newDog.save() //On sauvegarde le Chien dans la bdd
 
+    // Ajout du chien à son maitre
     const update = await User.updateOne(
       { token: token },
       { $addToSet: { dogs: save._id } }
     )
-    console.log('normalement tout est bon', save)
 
-    res.json({ result: true, dog: save })
+    // Réponse réussie
+    return res.json({ result: true, dog: save, ajoutUser: update })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ result: false, error: "erreur serveur" })
+    return res.status(500).json({ result: false, error: "erreur serveur" })
   }
 })
 
