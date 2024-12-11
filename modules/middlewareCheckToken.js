@@ -7,15 +7,13 @@ async function middlewareCheckToken(req, res, next) {
     const token = req.headers.authorization?.split(" ")[1] // Format "Bearer <token>"
 
     if (!token) {
-      res.json({ result: false, error: "Token error." })
-      return
+      return res.json({ result: false, error: "Token error." })
     }
 
     // Rechercher l'utilisateur associé au token
     const user = await User.findOne({ token })
     if (!user) {
-      res.json({ result: false, error: "Token error." })
-      return
+      return res.json({ result: false, error: "Token error." })
     }
 
     // Vérifier si le token est toujours valide (moins de 90 jours)
@@ -26,15 +24,13 @@ async function middlewareCheckToken(req, res, next) {
     )
 
     if (daysSinceCreation > TOKEN_VALIDITY_DAYS) {
-      res.json({ result: false, error: "Token error." })
-      return
+      return res.json({ result: false, error: "Token error." })
     }
 
     // Si tout est valide, retourner une réponse ou passer au prochain middleware
-    next()
+    return next()
   } catch (error) {
-    res.json({ result: false, error: "Token error." })
-    return
+    return res.json({ result: false, error: "Token error." })
   }
 }
 
