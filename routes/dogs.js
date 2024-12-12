@@ -7,16 +7,17 @@ const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 const { findToken } = require("../modules/findToken")
 var { upload } = require("../modules/cloudinary")
 
-/* Route GET pour recuperer les infos du chiens */
+/* Route GET pour recuperer les infos du chien */
 router.get("/", middlewareCheckToken, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
+  console.log("on y va")
   try {
     const user = await User.findOne({ token: token }).populate("dogs")
 
     res.json({ result: true, dog: user.dogs })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ result: false, error: "erreur serveur" })
+    res.status(500).json({ result: false, error: "erreur serveur 1" })
   }
 })
 

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema({
   email: String,
@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
   idApple: String,
   tokenCreationDate: Date,
   dogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dog" }],
-});
+})
 
-const User = mongoose.model("users", userSchema);
+const User = mongoose.model("users", userSchema)
 
-module.exports = User;
+module.exports = User
