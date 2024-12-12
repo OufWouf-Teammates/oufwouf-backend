@@ -28,6 +28,8 @@ async function middlewareCheckToken(req, res, next) {
     }
 
     // Si tout est valide, retourner une réponse ou passer au prochain middleware
+    req.token = token;
+    
     return next()
   } catch (error) {
     return res.json({ result: false, error: "Token error." })

@@ -136,46 +136,49 @@ router.get("/lieu/:placeId", async (req, res) => {
     }
 });
 
+/* Route pour afficher les photos */
+//MIDDLEWARE
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
 
-router.post('/canBookmark/:name', async (req, res) => {
-    // Récupération du token utilisateur depuis le middleware
-    const name = req.params.name;
+router.get("/", middlewareCheckToken, async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
 
-  
+  try {
+    const user = await User.findOne({ token: token }).populate("pictures");
+    res.json({ result: true, personalPicture: user.pictures });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ result: false, error: "erreur serveur" });
+  }
+});
+
+
+
+router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
     try {
-      // Trouver l'utilisateur par son token
-      const favorite = await Favorite.findOne({ name: name });
-  
-      if (!favorite) {
-        return res.status(404).json({ result: false, error: 'Utilisateur non trouvé' });
-      }
-      await User.populate('Favorite')
-      // Créer les favoris pour l'utilisateur
-        const newFavorite = new Favorite({
-          name: favorite.name,
-          markerData: favorite.markerData,
-          user: user._id  // Associer chaque favori à l'utilisateur
-        });
-        return newFavorite.save();
-      ;
-  
-      // Exécuter toutes les promesses pour sauvegarder les favoris
-      const savedFavorites = await Promise.all(favoritePromises);
-  
-      // Ajouter les favoris à l'utilisateur
-      user.favorites.push(...savedFavorites.map(fav => fav._id));
-      await user.save();
-  
-      res.json({
-        result: true,
-        message: 'Favoris ajoutés avec succès',
-        favorites: savedFavorites, // Renvoyer les favoris nouvellement ajoutés
-      });
-    } catch (error) {
-      console.error('Erreur lors de la gestion des favoris:', error);
-      res.status(500).json({ result: false, error: 'Erreur interne du serveur' });
-    }
-  });
+        const { token } = req;
+
+        const newFav = new Favorite ({
+            name: req.body.name,
+            uri: req.body.uri
+        })
+
+        await newFav.save()
+
+        await User.updateOne(
+            { token: token },
+            { $addToSet: { favorites: newFav._id } }
+          );
+        
+          console.log({result: true, newFavorite: newFav});
+          
+        return res.json({ result: true, newFavorite: newFav });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ result: false, error: "erreur serveur" });
+          }
+});
   
   
   
