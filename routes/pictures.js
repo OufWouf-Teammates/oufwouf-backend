@@ -10,8 +10,7 @@ const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
 var { upload } = require("../modules/cloudinary");
 
 router.get("/", middlewareCheckToken, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
+  const { token } = req;
   try {
     const user = await User.findOne({ token: token }).populate("pictures");
     res.json({ result: true, personalPicture: user.pictures });
@@ -24,6 +23,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 /* Route pour ajouter une photo */
 
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
+  const { token } = req;
   try {
     if (!token) {
       return res.status(401).json({ result: false, error: "Token manquant" });
