@@ -7,6 +7,6 @@ const pictureSchema = new mongoose.Schema({
   longitude: Number,
 });
 
-const Picture = mongoose.model("pictures", pictureSchema);
+const Picture = mongoose.model("Picture", pictureSchema);
 
 module.exports = Picture;
