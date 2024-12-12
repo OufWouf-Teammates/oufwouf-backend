@@ -12,6 +12,6 @@ const dogSchema = new mongoose.Schema({
   vaccins: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vaccin" }],
 })
 
-const Dog = mongoose.model("dogs", dogSchema)
+const Dog = mongoose.model("Dog", dogSchema)
 
 module.exports = Dog
