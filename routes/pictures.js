@@ -24,7 +24,6 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 /* Route pour ajouter une photo */
 
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
   try {
     if (!token) {
       return res.status(401).json({ result: false, error: "Token manquant" });
@@ -103,7 +102,7 @@ router.post("/description", async (req, res, next) => {
 router.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const picture = await Picture.findByIdAndDelete(id)
+    const picture = await Picture.findByIdAndDelete(id);
     if (!picture) {
       return res.json({ result: false, message: "photo non trouvée bouuhh." });
     }
