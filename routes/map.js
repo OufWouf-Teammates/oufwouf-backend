@@ -103,7 +103,7 @@ router.get("/lieu/:placeId", async (req, res) => {
 
     try {
         // Requête à l'API Place Details
-        const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}`;
+        const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}&language=fr`;
         const response = await fetch(placeDetailsUrl);
 
         if (!response.ok) {
