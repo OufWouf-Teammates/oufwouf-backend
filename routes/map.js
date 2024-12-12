@@ -141,11 +141,12 @@ router.get("/lieu/:placeId", async (req, res) => {
 const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
 
 router.get("/", middlewareCheckToken, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+    
+    try {
+      const { token } = req;
+      const user = await User.findOne({ token }).populate('favorites')
 
-  try {
-    const user = await User.findOne({ token: token }).populate("pictures");
-    res.json({ result: true, personalPicture: user.pictures });
+    res.json({ result: true, favorite: user.favorites });
   } catch (error) {
     console.error(error);
     res.status(500).json({ result: false, error: "erreur serveur" });
@@ -157,6 +158,8 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
     try {
         const { token } = req;
+
+        console.log(req.body.name)
 
         const newFav = new Favorite ({
             name: req.body.name,
