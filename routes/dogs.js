@@ -13,7 +13,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
   try {
     const user = await User.findOne({ token: token }).populate("dogs")
 
-    res.json({ result: true, dog: user.dogs })
+    res.json({ result: true, dog: user.dogs, user: user })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
