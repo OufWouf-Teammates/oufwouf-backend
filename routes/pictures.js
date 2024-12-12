@@ -63,13 +63,8 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
   }
 });
 
-router.post("/description", middlewareCheckToken, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+router.post("/description", async (req, res, next) => {
   try {
-    if (!token) {
-      return res.status(401).json({ result: false, error: "Token manquant" });
-    }
-
     console.log("je rentre dans la route");
     const { uri, description } = req.body;
     if (!uri || !description) {
@@ -93,14 +88,26 @@ router.post("/description", middlewareCheckToken, async (req, res, next) => {
     const updatedPicture = await picture.save();
 
     if (!updatedPicture) {
-      return res
-        .status(400)
-        .json({
-          result: false,
-          error: "Échec de la mise à jour de la description",
-        });
+      return res.status(400).json({
+        result: false,
+        error: "Échec de la mise à jour de la description",
+      });
     }
     return res.json({ result: true, description: picture.description });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ result: false, error: "erreur serveur" });
+  }
+});
+
+router.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const picture = await Picture.findByIdAndDelete(id)
+    if (!picture) {
+      return res.json({ result: false, message: "photo non trouvée bouuhh." });
+    }
+    res.json({ result: true, message: "ta photo est dans la poubelle!" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ result: false, error: "erreur serveur" });
