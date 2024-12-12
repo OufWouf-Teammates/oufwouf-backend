@@ -8,7 +8,7 @@
     idApple: String,
     tokenCreationDate: Date,
     dogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dog" }],
-    personalPicture: [{ type: mongoose.Schema.Types.ObjectId, ref: "Picture" }],
+    pictures: [{ type: mongoose.Schema.Types.ObjectId, ref: "Picture" }],
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Favorite" }]
   });
 
