@@ -163,7 +163,8 @@ router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
 
         const newFav = new Favorite ({
             name: req.body.name,
-            uri: req.body.uri
+            uri: req.body.uri,
+            city: req.body.city
         })
 
         await newFav.save()
@@ -182,6 +183,20 @@ router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
             return res.status(500).json({ result: false, error: "erreur serveur" });
           }
 });
+
+router.get("/", middlewareCheckToken, async (req, res, next) => {
+    const { token } = req;
+    try {
+        console.log('je rentre dans la route')
+        const user = await User.findOne({ token: token }).populate("favorites");
+        console.log(user)
+      res.json({ result: true, favorite: user.favorites });
+    } catch (error) {
+        console.log('CRASH')
+      console.error(error);
+      res.status(500).json({ result: false, error: "erreur serveur" });
+    }
+  });
   
   
   
