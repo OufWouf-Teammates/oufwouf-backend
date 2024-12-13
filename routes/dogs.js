@@ -63,9 +63,6 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
   }
 })
 
-<<<<<<< HEAD
-module.exports = router
-=======
 // Route put pour modifier les donnes du chien du chien
 router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
@@ -118,4 +115,3 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 });
 
 module.exports = router;
->>>>>>> 7551d26be2c261a67f19c691850297449c692b9d
