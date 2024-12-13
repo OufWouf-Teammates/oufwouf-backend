@@ -13,9 +13,9 @@ router.post("/", async (req, res, next) => {
 
   const save = await newVaccin.save()
 
-  const user = await findOne({ token: req.headers.authorization }).populate(
-    "dogs"
-  )
+  const token = req.headers.authorization.slice(" ")[1]
+
+  const user = await findOne({ token: token }).populate("dogs")
 
   const dogId = user.dogs[0]._id
   await User.updateOne(
