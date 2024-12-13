@@ -161,7 +161,7 @@ router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
         const { name, uri, city } = req.body;
 
         // Vérifier si le favori existe déjà
-        const existingFav = await Favorite.findOne({ name, city });
+        const existingFav = await Favorite.findOne({ name, city, uri });
 
         if (existingFav) {
             // Si le favori existe déjà, retourner une réponse indiquant que ce favori existe
