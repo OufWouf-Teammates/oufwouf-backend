@@ -199,6 +199,20 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
   });
   
   
-  
+  router.delete("/delete/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        console.log('je rentre dans la route')
+      const favorite = await Favorite.findByIdAndDelete(id);
+      console.log(favorite)
+      if (!favorite) {
+        return res.json({ result: false, message: "Aucun effet" });
+      }
+      res.json({ result: true, message: "ton bookmark est dans la poubelle!" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ result: false, error: "erreur serveur" });
+    }
+  }); 
 
 module.exports = router;
