@@ -1,41 +1,39 @@
-var express = require("express");
-var router = express.Router();
-var Dog = require("../models/dog");
-var User = require("../models/user");
+var express = require("express")
+var router = express.Router()
+var Dog = require("../models/dog")
+var User = require("../models/user")
 
-const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
-const { findToken } = require("../modules/findToken");
-var { upload } = require("../modules/cloudinary");
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
+const { findToken } = require("../modules/findToken")
+var { upload } = require("../modules/cloudinary")
 
-/* Route GET pour recuperer les infos du chiens */
+/* Route GET pour recuperer les infos du chien */
 router.get("/", middlewareCheckToken, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization?.split(" ")[1]
   try {
-    const user = await User.findOne({ token: token }).populate("dogs");
+    const user = await User.findOne({ token: token }).populate("dogs")
 
     res.json({ result: true, dog: user.dogs, user: user })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ result: false, error: "erreur serveur" });
+    console.error(error)
+    res.status(500).json({ result: false, error: "erreur serveur" })
   }
-});
+})
 
 // Route Post pour créer un nouveua chien à l'utilisateur
 router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization?.split(" ")[1]
 
   try {
     if (!token) {
-      return res.status(401).json({ result: false, error: "Token manquant" });
+      return res.status(401).json({ result: false, error: "Token manquant" })
     }
     if (!req.body.data || !req.files) {
-      return res
-        .status(400)
-        .json({ result: false, error: "Données invalides" });
+      return res.status(400).json({ result: false, error: "Données invalides" })
     }
 
-    const data = JSON.parse(req.body.data);
-    const uri = req.files?.cloudinary_url;
+    const data = JSON.parse(req.body.data)
+    const uri = req.files?.cloudinary_url
 
     //Creation du Chien
     const newDog = new Dog({
@@ -47,24 +45,27 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
       birthday: data.birthday,
       infos: data.infos,
       personality: data.personality,
-    });
+    })
 
-    const save = await newDog.save(); //On sauvegarde le Chien dans la bdd
+    const save = await newDog.save() //On sauvegarde le Chien dans la bdd
 
     // Ajout du chien à son maitre
     const update = await User.updateOne(
       { token: token },
       { $addToSet: { dogs: save._id } }
-    );
+    )
 
     // Réponse réussie
-    return res.json({ result: true, dog: save, ajoutUser: update });
+    return res.json({ result: true, dog: save, ajoutUser: update })
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ result: false, error: "erreur serveur" });
+    console.error(error)
+    return res.status(500).json({ result: false, error: "erreur serveur" })
   }
-});
+})
 
+<<<<<<< HEAD
+module.exports = router
+=======
 // Route put pour modifier les donnes du chien du chien
 router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
@@ -117,3 +118,4 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 });
 
 module.exports = router;
+>>>>>>> 7551d26be2c261a67f19c691850297449c692b9d
