@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 
 const apiKey = process.env.API_KEY;
+const Favorite = require('../models/favorite');
+const User = require('../models/user');
 
 // Route Post pour rechercher des boutiques 
 router.post("/boutiques/:localisation", async (req, res) => {
@@ -133,5 +135,55 @@ router.get("/lieu/:placeId", async (req, res) => {
         res.status(400).json({ result: false, error: error.message || 'Search failed' });
     }
 });
+
+/* Route pour afficher les photos */
+//MIDDLEWARE
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
+
+router.get("/", middlewareCheckToken, async (req, res, next) => {
+    
+    try {
+      const { token } = req;
+      const user = await User.findOne({ token }).populate('favorites')
+
+    res.json({ result: true, favorite: user.favorites });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ result: false, error: "erreur serveur" });
+  }
+});
+
+
+
+router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
+    try {
+        const { token } = req;
+
+        console.log(req.body.name)
+
+        const newFav = new Favorite ({
+            name: req.body.name,
+            uri: req.body.uri
+        })
+
+        await newFav.save()
+
+        await User.updateOne(
+            { token: token },
+            { $addToSet: { favorites: newFav._id } }
+          );
+        
+          console.log({result: true, newFavorite: newFav});
+          
+        return res.json({ result: true, newFavorite: newFav });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ result: false, error: "erreur serveur" });
+          }
+});
+  
+  
+  
 
 module.exports = router;
