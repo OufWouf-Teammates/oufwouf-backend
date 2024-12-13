@@ -158,6 +158,15 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 router.post('/canBookmark', middlewareCheckToken, async (req, res, next) => {
     try {
         const { token } = req;
+        const { name, uri, city } = req.body;
+
+        // Vérifier si le favori existe déjà
+        const existingFav = await Favorite.findOne({ name, city });
+
+        if (existingFav) {
+            // Si le favori existe déjà, retourner une réponse indiquant que ce favori existe
+            return res.json({ result: false, message: "Ce favori existe déjà." });
+        }
 
         console.log(req.body.name)
 
@@ -204,6 +213,21 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
     try {
         console.log('je rentre dans la route')
       const favorite = await Favorite.findByIdAndDelete(id);
+      if (!favorite) {
+        return res.json({ result: false, message: "Aucun effet" });
+      }
+      res.json({ result: true, message: "ton bookmark est dans la poubelle!" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ result: false, error: "erreur serveur" });
+    }
+  }); 
+
+  router.delete("/deletePoint/:name", async (req, res) => {
+    const { name } = req.params;
+    try {
+        console.log('je rentre dans la route')
+      const favorite = await Favorite.findOneAndDelete({name});
       console.log(favorite)
       if (!favorite) {
         return res.json({ result: false, message: "Aucun effet" });
