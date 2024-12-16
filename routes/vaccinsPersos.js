@@ -16,7 +16,7 @@ router.post("/", async (req, res, next) => {
     const savedVaccin = await newVaccin.save();
 
     // Trouvez l'utilisateur associé au token
-    const user = await User.findOne({ token: req.headers.authorization }).populate("dogs");
+    const user = await User.findOne({ token: req.headers.authorization }).populate("dogs").populate('vaccins');
 
     if (!user) {
       return res.status(404).json({ error: "Utilisateur introuvable" });
