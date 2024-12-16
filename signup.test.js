@@ -2,10 +2,10 @@ const request = require('supertest');
 const app = require('./app');
 const Favorite = require('./models/favorite');
 
-it('should post a bookmark in bookmark', async () => {
+it('should post a Favorite in bookmark', async () => {
 
 
-  Favorite.prototype.save.mockResolvedValue({
+  Favorite.prototype.save({
     _id: 'idCreation',
     name: 'Test Name',
     uri: 'http://example.com',
