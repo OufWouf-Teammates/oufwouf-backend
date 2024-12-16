@@ -112,6 +112,39 @@ router.delete('/:token', async (req, res) => {
   }
 });
 
+router.post('/changePassword', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  // Vérification des champs requis
+  if (!checkBody(req.body, ['token', 'newPassword'])) {
+    return res.status(400).json({ result: false, error: 'Missing or empty fields' });
+  }
+
+  try {
+    // Recherche de l'utilisateur avec le token
+    const user = await User.findOne({ token });
+
+    if (!user) {
+      return res.status(404).json({ result: false, error: 'Invalid token or user not found' });
+    }
+
+    // Hachage du nouveau mot de passe
+    const hash = bcrypt.hashSync(newPassword, 10);
+
+    // Mise à jour du mot de passe et génération d'un nouveau token
+    user.password = hash;
+    user.token = uid2(32);
+    user.tokenCreationDate = new Date();
+
+    // Sauvegarde des modifications
+    await user.save();
+
+    res.status(200).json({ result: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Error changing password:', error.message);
+    res.status(500).json({ result: false, error: 'Internal server error' });
+  }
+});
 
 router.post('/api/auth/apple', async (req, res, next) => {
   try {
