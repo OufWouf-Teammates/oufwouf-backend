@@ -11,9 +11,10 @@ var { upload } = require("../modules/cloudinary")
 router.get("/", middlewareCheckToken, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   try {
-    const user = await User.findOne({ token: token }).populate("dogs")
+    const user = await User.findOne({ token: token }).populate("dogs");
+    const dog = await Dog.findOne({_id: user.dogs[0]}).populate("vaccins");
 
-    res.json({ result: true, dog: user.dogs, user: user })
+    res.json({ result: true, dog: dog, user: user })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
