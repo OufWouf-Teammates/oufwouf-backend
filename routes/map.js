@@ -162,9 +162,11 @@ const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 router.get("/", middlewareCheckToken, async (req, res, next) => {
   try {
     const { token } = req
-    const user = await User.findOne({ token }).populate("favorites")
+    const user = await User.findOne({ token: token })
 
-    res.json({ result: true, favorite: user.favorites })
+    const bookmark = await Favorite.find({ users: user._id })
+
+    res.json({ result: true, favorite: bookmark })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
@@ -211,6 +213,7 @@ router.post("/addBookmark", middlewareCheckToken, async (req, res, next) => {
 // Get favorite
 router.get("/isBookmarked", middlewareCheckToken, async (req, res, next) => {
   const { token } = req
+
   const name = req.query.name
   try {
     const user = await User.findOne({ token: token })
@@ -221,7 +224,7 @@ router.get("/isBookmarked", middlewareCheckToken, async (req, res, next) => {
     } else {
       // Vérifier si l'utilisateur est dans la liste des utilisateurs du favori
       const isBookmarked = favorite.users.some(
-        (e) => e.toString() === user._id.toString()
+        (e) => e.toString() === user?._id.toString()
       )
 
       // Retourner le statut
@@ -253,8 +256,8 @@ router.delete("/deletePoint/:name", middlewareCheckToken, async (req, res) => {
   const { name } = req.params
   const { token } = req
   try {
-    const user = User.findOne({ token: token })
-    const favorite = Favorite.updateOne(
+    const user = await User.findOne({ token: token })
+    const favorite = await Favorite.updateOne(
       { name: name },
       { $pull: { users: user._id } }
     )
