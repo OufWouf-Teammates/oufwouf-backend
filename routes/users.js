@@ -242,4 +242,40 @@ router.get('/isConnectedOrNot', middlewareCheckToken, (req, res, next) => {
 
 })
 
+// Route put pour modifier les donnes de l'utilisateur 
+router.put("/", middlewareCheckToken, async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+
+  try {
+    if (!token) {
+      return res.status(401).json({ result: false, error: "Token manquant" });
+    }
+
+    // Récupérer l'utilisateur
+    const user = await User.findOne({ token: token })
+    if (!user) {
+      return res.status(404).json({ result: false, error: "Utilisateur non trouvé" });
+    }
+
+    // Récupérer les données et l'URL de l'image
+    const email = req.body.email;
+
+    // Mise à jour de l'email avec le nouveau email
+    const updatedFields = {};
+    if (email) updatedFields.email = email;
+
+    // Mise à jour du chien dans la base de données
+    const updatedUser = await User.findOneAndUpdate({ token: token }, updatedFields, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ result: false, error: "Utilisateur non trouvé pour la mise à jour" });
+    }
+
+    // Retourner la réponse avec l'user mis à jour
+    return res.json({ result: true, email: email });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ result: false, error: "Erreur serveur" });
+  }
+});
+
 module.exports = router;

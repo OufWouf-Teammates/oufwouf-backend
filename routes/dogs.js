@@ -94,14 +94,14 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
     // }
 
     // Récupérer les données et l'URL de l'image
-    const data = req.body.data ? JSON.parse(req.body.data) : {}
-    const uri = req.files?.cloudinary_url
+    const { infos, personality } = req.body;
+    const uri = req.files?.cloudinary_url;
 
     // Mise à jour des informations du chien avec les nouvelles données
-    const updatedFields = {}
-    if (uri) updatedFields.uri = uri
-    if (data.infos) updatedFields.infos = data.infos
-    if (data.personality) updatedFields.personality = data.personality
+    const updatedFields = {};
+    if (uri) updatedFields.uri = uri;
+    if (infos) updatedFields.infos = infos;
+    if (personality) updatedFields.personality = personality;
 
     // Mise à jour du chien dans la base de données
     const updatedDog = await Dog.findByIdAndUpdate(dogId, updatedFields, {
