@@ -4,6 +4,9 @@ const favoriteSchema = new mongoose.Schema({
   name: String,
   uri: String,
   city: String,
+  latitude: Number,
+  longitude: Number,
+  id: String,
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 })
 
