@@ -2,9 +2,11 @@ var express = require("express")
 var router = express.Router()
 const VaccinPerso = require("../models/vaccinPerso")
 const User = require("../models/user")
+const Dog = require("../models/dog")
 
 /* GET home page. */
 router.post("/", async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
   try {
     // Créez le vaccin personnalisé
     const newVaccin = new VaccinPerso({
@@ -16,7 +18,7 @@ router.post("/", async (req, res, next) => {
     const savedVaccin = await newVaccin.save();
 
     // Trouvez l'utilisateur associé au token
-    const user = await User.findOne({ token: req.headers.authorization }).populate("dogs");
+    const user = await User.findOne({ token: token }).populate("dogs");
 
     if (!user) {
       return res.status(404).json({ error: "Utilisateur introuvable" });
@@ -29,12 +31,15 @@ router.post("/", async (req, res, next) => {
     }
 
     // Ajoutez l'ID du vaccin au tableau `vaccins` du chien
-    await User.updateOne(
-      { "dogs._id": dogId },
-      { $push: { "dogs.$.vaccins": savedVaccin._id } }
-    );
+    const dog = await Dog.findById(dogId);
+    if (dog) {
+      dog.vaccins.push(savedVaccin._id);
+      await dog.save();
+    } else {
+      throw new Error("Chien introuvable");
+    }
 
-    res.json({ data: savedVaccin });
+    res.json({result: true, data: savedVaccin });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erreur interne du serveur" });
