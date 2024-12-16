@@ -4,6 +4,8 @@ var router = express.Router()
 const apiKey = process.env.API_KEY
 const Favorite = require("../models/favorite")
 const User = require("../models/user")
+//MIDDLEWARE
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 
 // Route Post pour rechercher des boutiques
 router.post("/boutiques/:localisation", async (req, res) => {
@@ -87,6 +89,8 @@ router.post("/parcs-chiens/:localisation", async (req, res, next) => {
 
     const data = await response.json()
 
+    console.log("exemple:", data.results)
+
     // Vérification si des résultats sont trouvés
     if (data.results && data.results.length > 0) {
       res.status(200).json({ result: true, data: data.results })
@@ -103,6 +107,59 @@ router.post("/parcs-chiens/:localisation", async (req, res, next) => {
     })
   }
 })
+
+//Route post pour recherche les parks
+router.post(
+  "/bookmarks/:localisation",
+  middlewareCheckToken,
+  async (req, res, next) => {
+    const { token } = req
+    const [lat, lon] = req.params.localisation.split(",") // Récupération de la position
+
+    try {
+      const user = await User.findOne({ token: token })
+      const bookmarks = await Favorite.find({ users: user._id })
+
+      const data = bookmarks.map((e) => ({
+        name: e.name,
+        uri: e.uri,
+        city: e.city,
+        latitude: e.latitude,
+        longitude: e.longitude,
+        place_id: e.id,
+        geometry: { location: { lat: e.latitude, lng: e.longitude } },
+      }))
+
+      res.json({ result: true, data: data })
+
+      // Requête à l'API Google Maps Places avec le mot-clé "dog park"
+      // const response = await fetch(
+      //   `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=10000&type=park&keyword=dog+park&key=${apiKey}`
+      // )
+
+      // if (!response.ok) {
+      //   throw new Error(
+      //     "Échec de la récupération des données depuis Google Maps"
+      //   )
+      // }
+
+      // const data = await response.json()
+
+      // // Vérification si des résultats sont trouvés
+      // if (data.results && data.results.length > 0) {
+      //   res.status(200).json({ result: true, data: data.results })
+      // } else {
+      //   res.status(404).json({ result: false, message: "Pas de bookmarks" })
+      // }
+    } catch (error) {
+      console.error("Erreur lors de la recherche :", error)
+      res.status(500).json({
+        result: false,
+        error: "Une erreur est survenue lors de la recherche",
+      })
+    }
+  }
+)
 
 //Route pour afficher les infotmations d'un lieu avec google places
 router.get("/lieu/:placeId", async (req, res) => {
@@ -156,8 +213,6 @@ router.get("/lieu/:placeId", async (req, res) => {
 })
 
 /* Route pour afficher les photos */
-//MIDDLEWARE
-const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 
 router.get("/", middlewareCheckToken, async (req, res, next) => {
   try {
@@ -177,7 +232,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
 router.post("/addBookmark", middlewareCheckToken, async (req, res, next) => {
   try {
     const { token } = req
-    const { name, uri, city } = req.body
+    const { name, uri, city, latitude, longitude, id } = req.body
 
     //On cherche si le bookMark est dans la base de donnée
     const user = await User.findOne({ token: token })
@@ -189,6 +244,9 @@ router.post("/addBookmark", middlewareCheckToken, async (req, res, next) => {
         name: name,
         uri: uri,
         city: city,
+        latitude: latitude,
+        longitude: longitude,
+        id: id,
         users: [user._id],
       })
 

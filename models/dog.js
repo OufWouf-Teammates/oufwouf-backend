@@ -9,7 +9,7 @@ const dogSchema = new mongoose.Schema({
   birthday: { type: String, required: false },
   infos: { type: String, required: false },
   personality: { type: String, required: false },
-  vaccins: [{ type: mongoose.Schema.Types.ObjectId, ref: "Vaccin" }],
+  vaccins: [{ type: mongoose.Schema.Types.ObjectId, ref: "vaccinsPersos" }],
 })
 
 const Dog = mongoose.model("Dog", dogSchema)
