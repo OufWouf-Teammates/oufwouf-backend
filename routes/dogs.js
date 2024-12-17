@@ -12,9 +12,13 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   try {
     const user = await User.findOne({ token: token }).populate("dogs");
-    const dog = await Dog.findOne({_id: user.dogs[0]}).populate("vaccins");
 
-    res.json({ result: true, dog: dog, user: user })
+    // Peupler les vaccins pour tous les chiens
+    const dogsWithVaccins = await Dog.find({ _id: { $in: user.dogs } }).populate("vaccins");
+
+    // Remplace les chiens de l'utilisateur par ceux avec les vaccins peuplés
+    user.dogs = dogsWithVaccins;
+    res.json({ result: true, dog: user.dogs, user: user })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
@@ -82,7 +86,7 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
     }
 
     // Vérification de l'existence d'un chien pour cet utilisateur
-    const dogId = user.dogs[0]?._id // On prend le premier chien de l'utilisateur
+    const dogId = req.body.dog // On prend le premier chien de l'utilisateur
     if (!dogId) {
       return res
         .status(404)
