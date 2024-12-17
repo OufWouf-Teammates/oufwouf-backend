@@ -11,11 +11,12 @@ async function upload(req, res, next) {
   const resultMove = await req.files.photoFromFront.mv(photoPath)
 
   if (!resultMove) {
-    const resultCloudinary = await cloudinary.uploader.upload(photoPath)
+    const resultCloudinary = await cloudinary.uploader.upload(photoPath)    
     fs.unlinkSync(photoPath)
-    req.files.cloudinary_url = resultCloudinary.secure_url
+    req.cloudinary_url = resultCloudinary.secure_url
     return next()
   } else {
+    console.log("JODER");
     return res.json({ result: false, error: resultMove })
   }
 

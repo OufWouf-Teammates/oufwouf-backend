@@ -38,7 +38,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
     }
 
     const data = JSON.parse(req.body.data)
-    const uri = req.files?.cloudinary_url
+    const uri = req.cloudinary_url
 
     //Creation du Chien
     const newDog = new Dog({
