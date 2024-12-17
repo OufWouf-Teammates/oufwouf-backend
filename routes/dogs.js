@@ -128,11 +128,13 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 })
 
 // Route pour modifier la photo de profil du chien
-router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
+router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+  const { dogId } = req.params; // Utiliser dogId comme dans l'URL
 
   console.log("Token reçu :", token); // Afficher le token pour vérifier qu'il est bien passé
-
+  console.log("ID du chien reçu :", dogId); // Afficher l'ID du chien reçu dans l'URL
+  
   try {
     if (!token) {
       return res.status(401).json({ result: false, error: "Token manquant" });
@@ -147,24 +149,23 @@ router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
     }
 
     // Vérification de l'existence du chien
-    const dogId = user.dogs[0]?._id;
-    console.log("ID du chien :", dogId); // Afficher l'ID du chien
+    const foundDog = user.dogs.find(dog => dog._id.toString() === dogId);  // Recherchez le chien avec le dogId
+    console.log("Chien trouvé :", foundDog); // Afficher le chien trouvé
 
-    if (!dogId) {
+    if (!foundDog) {
       return res.status(404).json({ result: false, error: "Chien non trouvé pour cet utilisateur" });
     }
 
-    // Vérification de la présence du fichier
-    const uri = req.files?.cloudinary_url;
+    // Vérification de la présence du fichier image
+    const uri = req.files?.cloudinary_url;  // Assurez-vous que vous utilisez le bon nom de champ ici
     console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
-    console.log("URI DE L4IMAGE", uri)
     if (!uri) {
       return res.status(400).json({ result: false, error: "Aucune image fournie" });
     }
 
     // Mise à jour du chien avec la nouvelle image
     const updatedDog = await Dog.findByIdAndUpdate(
-      dogId, // ID du chien à mettre à jour
+      foundDog._id, // ID du chien à mettre à jour
       { uri: uri }, // Mettre à jour le champ `uri` avec l'URL de l'image
     );
 
@@ -180,6 +181,7 @@ router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
     return res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
+
 
 
 module.exports = router;
