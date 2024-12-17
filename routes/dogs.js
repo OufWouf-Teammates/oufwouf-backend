@@ -127,4 +127,59 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
   }
 })
 
+// Route pour modifier la photo de profil du chien
+router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+
+  console.log("Token reçu :", token); // Afficher le token pour vérifier qu'il est bien passé
+
+  try {
+    if (!token) {
+      return res.status(401).json({ result: false, error: "Token manquant" });
+    }
+
+    // Vérification de l'utilisateur
+    const user = await User.findOne({ token: token }).populate("dogs");
+    console.log("Utilisateur trouvé :", user); // Vérifier l'utilisateur
+
+    if (!user) {
+      return res.status(404).json({ result: false, error: "Utilisateur non trouvé" });
+    }
+
+    // Vérification de l'existence du chien
+    const dogId = user.dogs[0]?._id;
+    console.log("ID du chien :", dogId); // Afficher l'ID du chien
+
+    if (!dogId) {
+      return res.status(404).json({ result: false, error: "Chien non trouvé pour cet utilisateur" });
+    }
+
+    // Vérification de la présence du fichier
+    const uri = req.files?.cloudinary_url;
+    console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
+    console.log("URI DE L4IMAGE", uri)
+    if (!uri) {
+      return res.status(400).json({ result: false, error: "Aucune image fournie" });
+    }
+
+    // Mise à jour du chien avec la nouvelle image
+    const updatedDog = await Dog.findByIdAndUpdate(
+      dogId, // ID du chien à mettre à jour
+      { uri: uri }, // Mettre à jour le champ `uri` avec l'URL de l'image
+    );
+
+    console.log("Chien mis à jour :", updatedDog); // Afficher l'objet chien mis à jour
+
+    if (!updatedDog) {
+      return res.status(404).json({ result: false, error: "Chien non trouvé pour la mise à jour" });
+    }
+
+    return res.json({ result: true, dog: updatedDog });
+  } catch (error) {
+    console.error("Erreur serveur :", error); // Afficher l'erreur côté serveur
+    return res.status(500).json({ result: false, error: "Erreur serveur" });
+  }
+});
+
+
 module.exports = router;

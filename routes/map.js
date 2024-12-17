@@ -22,10 +22,18 @@ router.post("/boutiques/:localisation", async (req, res) => {
     }
 
     const data = await response.json()
+    const resultsWithPhotos = data.results.map((place) => {
+      const photos = (place.photos || []).map((photo) => {
+        return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo.photo_reference}&key=${apiKey}`;
+      })
+      return {
+        ...place,
+        photos, 
+      };
+    });
 
-    // Vérification si des résultats sont trouvés
-    if (data.results && data.results.length > 0) {
-      res.status(200).json({ result: true, data: data.results })
+    if (resultsWithPhotos.length > 0) {
+      res.status(200).json({ result: true, data: resultsWithPhotos, })
     } else {
       res
         .status(404)
@@ -55,10 +63,18 @@ router.post("/veterinaires/:localisation", async (req, res, next) => {
     }
 
     const data = await response.json()
+    const resultsWithPhotos = data.results.map((place) => {
+      const photos = (place.photos || []).map((photo) => {
+        return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo.photo_reference}&key=${apiKey}`;
+      })
+      return {
+        ...place,
+        photos, 
+      };
+    });
 
-    // Vérification si des résultats sont trouvés
-    if (data.results && data.results.length > 0) {
-      res.status(200).json({ result: true, data: data.results })
+    if (resultsWithPhotos.length > 0) {
+      res.status(200).json({ result: true, data: resultsWithPhotos, })
     } else {
       res
         .status(404)
@@ -88,12 +104,18 @@ router.post("/parcs-chiens/:localisation", async (req, res, next) => {
     }
 
     const data = await response.json()
+    const resultsWithPhotos = data.results.map((place) => {
+      const photos = (place.photos || []).map((photo) => {
+        return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo.photo_reference}&key=${apiKey}`;
+      })
+      return {
+        ...place,
+        photos, 
+      };
+    });
 
-    console.log("exemple:", data.results)
-
-    // Vérification si des résultats sont trouvés
-    if (data.results && data.results.length > 0) {
-      res.status(200).json({ result: true, data: data.results })
+    if (resultsWithPhotos.length > 0) {
+      res.status(200).json({ result: true, data: resultsWithPhotos, })
     } else {
       res
         .status(404)
