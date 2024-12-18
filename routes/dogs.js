@@ -100,7 +100,7 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 
     // Récupérer les données et l'URL de l'image
     const { infos, personality } = req.body;
-    const uri = req.files?.cloudinary_url;
+    const uri = req.cloudinary_url;
 
     // Mise à jour des informations du chien avec les nouvelles données
     const updatedFields = {};
@@ -157,7 +157,7 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
     }
 
     // Vérification de la présence du fichier image
-    const uri = req.files?.cloudinary_url; 
+    const uri = req.cloudinary_url; 
     console.log(uri) // Assurez-vous que vous utilisez le bon nom de champ ici
     console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
     if (!uri) {
