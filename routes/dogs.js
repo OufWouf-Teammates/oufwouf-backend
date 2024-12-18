@@ -12,9 +12,13 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]
   try {
     const user = await User.findOne({ token: token }).populate("dogs");
-    const dog = await Dog.findOne({_id: user.dogs[0]}).populate("vaccins");
 
-    res.json({ result: true, dog: dog, user: user })
+    // Peupler les vaccins pour tous les chiens
+    const dogsWithVaccins = await Dog.find({ _id: { $in: user.dogs } }).populate("vaccins");
+
+    // Remplace les chiens de l'utilisateur par ceux avec les vaccins peuplés
+    user.dogs = dogsWithVaccins;
+    res.json({ result: true, dog: user.dogs, user: user })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
@@ -34,7 +38,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
     }
 
     const data = JSON.parse(req.body.data)
-    const uri = req.files?.cloudinary_url
+    const uri = req.cloudinary_url
 
     //Creation du Chien
     const newDog = new Dog({
@@ -82,7 +86,7 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
     }
 
     // Vérification de l'existence d'un chien pour cet utilisateur
-    const dogId = user.dogs[0]?._id // On prend le premier chien de l'utilisateur
+    const dogId = req.body.dog // On prend le premier chien de l'utilisateur
     if (!dogId) {
       return res
         .status(404)
@@ -96,7 +100,7 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 
     // Récupérer les données et l'URL de l'image
     const { infos, personality } = req.body;
-    const uri = req.files?.cloudinary_url;
+    const uri = req.cloudinary_url;
 
     // Mise à jour des informations du chien avec les nouvelles données
     const updatedFields = {};
@@ -124,11 +128,13 @@ router.put("/", middlewareCheckToken, upload, async (req, res, next) => {
 })
 
 // Route pour modifier la photo de profil du chien
-router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
+router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+  const { dogId } = req.params; // Utiliser dogId comme dans l'URL
 
   console.log("Token reçu :", token); // Afficher le token pour vérifier qu'il est bien passé
-
+  console.log("ID du chien reçu :", dogId); // Afficher l'ID du chien reçu dans l'URL
+  
   try {
     if (!token) {
       return res.status(401).json({ result: false, error: "Token manquant" });
@@ -143,24 +149,24 @@ router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
     }
 
     // Vérification de l'existence du chien
-    const dogId = user.dogs[0]?._id;
-    console.log("ID du chien :", dogId); // Afficher l'ID du chien
+    const foundDog = user.dogs.find(dog => dog._id.toString() === dogId);  // Recherchez le chien avec le dogId
+    console.log("Chien trouvé :", foundDog); // Afficher le chien trouvé
 
-    if (!dogId) {
+    if (!foundDog) {
       return res.status(404).json({ result: false, error: "Chien non trouvé pour cet utilisateur" });
     }
 
-    // Vérification de la présence du fichier
-    const uri = req.files?.cloudinary_url;
+    // Vérification de la présence du fichier image
+    const uri = req.cloudinary_url; 
+    console.log(uri) // Assurez-vous que vous utilisez le bon nom de champ ici
     console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
-    console.log("URI DE L4IMAGE", uri)
     if (!uri) {
       return res.status(400).json({ result: false, error: "Aucune image fournie" });
     }
 
     // Mise à jour du chien avec la nouvelle image
     const updatedDog = await Dog.findByIdAndUpdate(
-      dogId, // ID du chien à mettre à jour
+      foundDog._id, // ID du chien à mettre à jour
       { uri: uri }, // Mettre à jour le champ `uri` avec l'URL de l'image
     );
 
@@ -176,6 +182,7 @@ router.put('/modifier', middlewareCheckToken, upload, async (req, res) => {
     return res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
+
 
 
 module.exports = router;

@@ -25,13 +25,13 @@ router.post("/", async (req, res, next) => {
     }
 
     // Vérifiez si l'utilisateur a des chiens
-    const dogId = user.dogs[0]?._id;
+    const dogId = req.body.dogId;
     if (!dogId) {
       return res.status(404).json({ error: "Aucun chien trouvé pour cet utilisateur" });
     }
 
     // Ajoutez l'ID du vaccin au tableau `vaccins` du chien
-    const dog = await Dog.findById(dogId);
+    const dog = await Dog.findOne({ ID: dogId});
     if (dog) {
       dog.vaccins.push(savedVaccin._id);
       await dog.save();
