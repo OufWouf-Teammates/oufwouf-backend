@@ -24,7 +24,7 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
 
     const room = await newRoom.save()
 
-    res.json({ result: true, room: "room" })
+    res.json({ result: true, roome: "room" })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, message: "erreur serveur" })
