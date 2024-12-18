@@ -13,12 +13,13 @@ const fileUpload = require("express-fileupload")
 var indexRouter = require("./routes/index")
 var usersRouter = require("./routes/users")
 var dogsRouter = require("./routes/dogs")
+var roomsRouter = require("./routes/rooms")
+var messagesRouter = require("./routes/messages")
 var vaccinGenerauxRouter = require("./routes/vaccinGeneraux")
 var vaccinsPersosRouter = require("./routes/vaccinsPersos")
 var racesRouter = require("./routes/races")
 var mapRouter = require("./routes/map")
 var picturesRouter = require("./routes/pictures")
-
 
 var app = express()
 
@@ -38,5 +39,7 @@ app.use("/vaccinsPersos", vaccinsPersosRouter)
 app.use("/races", racesRouter)
 app.use("/map", mapRouter)
 app.use("/pictures", picturesRouter)
+app.use("/rooms", roomsRouter)
+app.use("/messages", messagesRouter)
 
 module.exports = app
