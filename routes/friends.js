@@ -50,9 +50,9 @@ router.post("/addFriend/:id", async (req, res, next) => {
   const { decision } = req.body;
 
   const request = await Friend.findById(id);
-
+console.log(decision);
   try {
-    if (!request || !request.status === "pending") {
+    if (!request || request.status !== "pending") {
       return res
         .status(400)
         .json({ result: false, error: "demande pas trouvée ou déjà traitée" });
