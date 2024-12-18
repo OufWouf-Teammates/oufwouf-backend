@@ -6,6 +6,6 @@ const messageSchema = new mongoose.Schema({
   receiver: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 })
 
-const Message = mongoose.model("messages", messageSchema)
+const Message = mongoose.model("Message", messageSchema)
 
 module.exports = Message
