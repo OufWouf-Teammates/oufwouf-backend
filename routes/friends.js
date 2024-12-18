@@ -7,8 +7,8 @@ const Room = require("../models/room")
 const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 const Friend = require("../models/friend")
 
-router.post("/request", async (req, res, next) => {
-  const token = req.body.token
+router.post("/request/:token", async (req, res, next) => {
+    const { token } = req.params;
 
   try {
     if (!token) {
@@ -110,7 +110,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
     if (!user) {
       return res.status(400).json({ result: false, error: "pas d'user trouvé" })
     }
-    res.status(201).json({ friends: user.friendList })
+    return res.status(201).json({ friends: user.friendList });
   } catch (error) {
     console.error(error)
     return res.status(500).json({ result: false, error: "Erreur serveur" })
