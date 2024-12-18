@@ -37,7 +37,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
     console.log("je rentre dans la route");
 
     const data = JSON.parse(req.body.data);
-    const uri = req.files?.cloudinary_url;
+    const uri = req?.cloudinary_url;
 
     const newPic = new Picture({
       description: data.description,
