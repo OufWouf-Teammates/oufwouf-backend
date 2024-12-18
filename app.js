@@ -20,6 +20,7 @@ var vaccinsPersosRouter = require("./routes/vaccinsPersos")
 var racesRouter = require("./routes/races")
 var mapRouter = require("./routes/map")
 var picturesRouter = require("./routes/pictures")
+var friendsRouter = require("./routes/friends")
 
 var app = express()
 
@@ -41,5 +42,6 @@ app.use("/map", mapRouter)
 app.use("/pictures", picturesRouter)
 app.use("/rooms", roomsRouter)
 app.use("/messages", messagesRouter)
+app.use("/friends", friendsRouter)
 
 module.exports = app

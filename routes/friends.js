@@ -1,12 +1,13 @@
 var express = require("express");
 var router = express.Router();
+var Dog = require("../models/dog");
 var User = require("../models/user");
 
 const { middlewareCheckToken } = require("../modules/middlewareCheckToken");
 const Friend = require("../models/friend");
 
-router.post("/request", middlewareCheckToken, async (req, res, next) => {
-  const { token } = req;
+router.post("/request", async (req, res, next) => {
+  const token = req.body.token;
 
   try {
     if (!token) {
@@ -99,24 +100,56 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
   }
 });
 
-router.get("/requestList", middlewareCheckToken, async (req, res, next) => {
-    const { token } = req;
-    const sender = await User.findOne({ token });
-    try {
-      const request = await Friend.find({ to: sender._id, status : 'pending'}).populate({
-        path: "from",
-        populate: { path: "dogs", select: "name" },
-      });
-      if (!request) {
-        return res
-          .status(400)
-          .json({ result: false, error: "aucune demande trouvée" });
-      }
-      res.status(201).json({ requestList: request });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ result: false, error: "Erreur serveur" });
+// router.get("/requestList/:token", async (req, res, next) => {
+//   const { token } = req.params;
+//   const receiver = await User.findOne({ token });
+//   console.log("0");
+//   try {
+//     const request = await Friend.find({
+//       to: receiver._id,
+//       status: "pending",
+//     }).populate("from");
+//     console.log("1");
+
+//     if (request.length === 0) {
+//       console.log("2");
+
+//       return res
+//         .status(200)
+//         .json({ result: false, error: "Aucune demande trouvée" });
+//     }
+//     console.log("3");
+
+//     res.status(201).json({ requestList: request });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ result: false, error: "Erreur serveur" });
+//   }
+// });
+
+router.get("/requestList/:token", async (req, res, next) => {
+  const { token } = req.params;
+  const sender = await User.findOne({ token });
+
+  try {
+    const request = await Friend.find({
+      to: sender._id,
+      status: "pending",
+    }).populate({
+      path: "from",
+      populate: { path: "dogs", select: "name uri" },
+    });
+
+    if (request.length === 0) {
+      return res
+        .status(200)
+        .json({ result: false, error: "Aucune demande trouvée" });
     }
-  });
+    res.status(201).json({ requestList: request });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ result: false, error: "Erreur serveur" });
+  }
+});
 
 module.exports = router;

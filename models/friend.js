@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
 const friendSchema = new mongoose.Schema({
-  from: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
-  to: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
+  from: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  to: { type: mongoose.Schema.Types.ObjectId, ref: "User" , required: true },
   status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
 });
 
-const Friend = mongoose.model("friends", friendSchema);
+const Friend = mongoose.model("Friend", friendSchema);
 
 module.exports = Friend;
