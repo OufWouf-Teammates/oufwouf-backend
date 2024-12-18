@@ -37,7 +37,7 @@ router.get("/", middlewareCheckToken, findReceiver, async (req, res) => {
   try {
     const user = await User.findOne({ token: token })
     const room = await Room.findOne({
-      users: { $all: [user, receiver] },
+      users: { $all: [user._id, receiver._id] },
     }).populate("messages")
 
     res.json({ result: true, messages: room.messages })
