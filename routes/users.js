@@ -333,7 +333,10 @@ router.put("/", middlewareCheckToken, async (req, res, next) => {
 router.get("/dogname", findReceiver, async (req, res) => {
   const { receiver } = req
   const user = await User.findOne({ email: receiver.email }).populate("dogs")
-  res.json({ result: true, user: user })
+  const photos = await User.findOne({ email: receiver.email }).populate(
+    "pictures"
+  )
+  res.json({ result: true, user: user, photos: photos.pictures })
 })
 
 module.exports = router
