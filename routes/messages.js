@@ -3,8 +3,8 @@ var router = express.Router()
 const Room = require("../models/room")
 const User = require("../models/user")
 const Message = require("../models/message")
-const middlewareCheckToken = require("../modules/middlewareCheckToken")
-const findReceiver = require("../modules/findReceiver")
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
+const { findReceiver } = require("../modules/findReceiver")
 
 router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
   const { token, receiver } = req
