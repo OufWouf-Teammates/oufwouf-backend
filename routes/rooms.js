@@ -54,7 +54,7 @@ router.get("/all", middlewareCheckToken, async (req, res) => {
     const user = await User.findOne({ token: token })
     const rooms = await Room.find({ users: { $all: [user._id] } })
 
-    res.json({ result: true, messages: rooms })
+    res.json({ result: true, rooms: rooms })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, message: "erreur serveur" })
