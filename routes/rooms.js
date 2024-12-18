@@ -6,8 +6,13 @@ const middlewareCheckToken = require("../modules/middlewareCheckToken")
 const findReceiver = require("../modules/findReceiver")
 
 /* GET home page. */
-router.post("/", middlewareCheckToken, findReceiver, async (req, res, next) => {
+router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
   const { token, receiver } = req
+
+  if (!token || !receiver) {
+    return res.status(500).json({ result: false })
+  }
+
   try {
     const sender = await User.findOne({ token: token })
 
@@ -19,14 +24,14 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res, next) => {
 
     const room = await newRoom.save()
 
-    res.json({ result: true, room: room })
+    res.json({ result: true, room: "room" })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, message: "erreur serveur" })
   }
 })
 
-router.get("/", middlewareCheckToken, findReceiver, async (req, res, next) => {
+router.get("/", middlewareCheckToken, findReceiver, async (req, res) => {
   const { token, receiver } = req
 
   try {
@@ -41,25 +46,5 @@ router.get("/", middlewareCheckToken, findReceiver, async (req, res, next) => {
     res.status(500).json({ result: false, message: "erreur serveur" })
   }
 })
-
-// router.put("/", middlewareCheckToken, async (req, res, next) => {
-//   const { token } = req
-//   try {
-//     const sender = await User.findOne({ token: token })
-//     const receiver = await User.findOne({ email: req.body.email })
-
-//     const message = "oui"
-
-//     const post = await Room.updateOne(
-//       { name: name },
-//       { $push: { messages: message } }
-//     )
-
-//     res.json({ result: true, message: post })
-//   } catch (error) {
-//     console.error(error)
-//     res.status(500).json({ result: false, message: "erreur serveur" })
-//   }
-// })
 
 module.exports = router
