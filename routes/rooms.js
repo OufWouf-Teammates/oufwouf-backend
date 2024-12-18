@@ -2,7 +2,6 @@ var express = require("express")
 var router = express.Router()
 const Room = require("../models/room")
 const User = require("../models/user")
-const Message = require("../models/message")
 const middlewareCheckToken = require("../modules/middlewareCheckToken")
 const findReceiver = require("../modules/findReceiver")
 
@@ -12,13 +11,13 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res, next) => {
   try {
     const sender = await User.findOne({ token: token })
 
-    const newRoom = await new Room({
+    const newRoom = new Room({
       name: req.body.name,
       users: [sender._id, receiver._id],
       messages: [],
     })
 
-    const room = newRoom.save()
+    const room = await newRoom.save()
 
     res.json({ result: true, room: room })
   } catch (error) {
