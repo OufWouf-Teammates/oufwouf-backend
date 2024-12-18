@@ -157,7 +157,8 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
     }
 
     // Vérification de la présence du fichier image
-    const uri = req.files?.cloudinary_url;  // Assurez-vous que vous utilisez le bon nom de champ ici
+    const uri = req.files?.cloudinary_url; 
+    console.log(uri) // Assurez-vous que vous utilisez le bon nom de champ ici
     console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
     if (!uri) {
       return res.status(400).json({ result: false, error: "Aucune image fournie" });
