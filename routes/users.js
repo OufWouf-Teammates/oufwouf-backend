@@ -14,6 +14,8 @@ const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 const { findToken } = require("../modules/findToken")
 
 const { validateAppleToken } = require("../modules/validateAppleToken")
+const { findReceiver } = require("../modules/findReceiver")
+const Dog = require("../models/dog")
 
 function connectToUser(req, res, next) {
   User.findOne({ email: req.body.email })
@@ -314,12 +316,10 @@ router.put("/", middlewareCheckToken, async (req, res, next) => {
       { new: true }
     )
     if (!updatedUser) {
-      return res
-        .status(404)
-        .json({
-          result: false,
-          error: "Utilisateur non trouvé pour la mise à jour",
-        })
+      return res.status(404).json({
+        result: false,
+        error: "Utilisateur non trouvé pour la mise à jour",
+      })
     }
 
     // Retourner la réponse avec l'user mis à jour
@@ -328,6 +328,15 @@ router.put("/", middlewareCheckToken, async (req, res, next) => {
     console.error(error)
     return res.status(500).json({ result: false, error: "Erreur serveur" })
   }
+})
+
+router.get("/dogname", findReceiver, async (req, res) => {
+  const { receiver } = req
+  const user = await User.findOne({ email: receiver.email }).populate("dogs")
+  const photos = await User.findOne({ email: receiver.email }).populate(
+    "pictures"
+  )
+  res.json({ result: true, user: user, photos: photos.pictures })
 })
 
 module.exports = router

@@ -183,6 +183,14 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
   }
 });
 
-
+router.get("/allDogs", middlewareCheckToken, async (req, res) => {
+  try {
+    const dogs = await Dog.find();
+    res.status(200).json(dogs);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des chiens :", error);
+    res.status(500).json({ error: "Erreur serveur lors de la récupération des chiens" });
+  }
+});
 
 module.exports = router;

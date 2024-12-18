@@ -20,7 +20,7 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
     const message = await newMessage.save()
 
     const postMessage = await Room.updateOne(
-      { name: req.body.name },
+      { users: { $all: [sender._id, receiver._id] } },
       { $addToSet: { messages: message._id } }
     )
 
