@@ -16,4 +16,4 @@ async function findReceiver(req, res, next) {
   }
 }
 
-module.exports = findReceiver
+module.exports = { findReceiver }

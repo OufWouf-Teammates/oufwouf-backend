@@ -2,8 +2,8 @@ var express = require("express")
 var router = express.Router()
 const Room = require("../models/room")
 const User = require("../models/user")
-const middlewareCheckToken = require("../modules/middlewareCheckToken")
-const findReceiver = require("../modules/findReceiver")
+const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
+const { findReceiver } = require("../modules/findReceiver")
 
 /* GET home page. */
 router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
@@ -24,7 +24,7 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
 
     const room = await newRoom.save()
 
-    res.json({ result: true, roome: "room" })
+    res.json({ result: true, room: room })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, message: "erreur serveur" })
