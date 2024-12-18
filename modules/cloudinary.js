@@ -7,19 +7,18 @@ async function upload(req, res, next) {
     return next()
   }
 
-  const photoPath = `/tmp/${uniqid()}.jpg`
+  const photoPath = `./tmp/${uniqid()}.jpg`
   const resultMove = await req.files.photoFromFront.mv(photoPath)
 
   if (!resultMove) {
-    const resultCloudinary = await cloudinary.uploader.upload(photoPath)    
+    const resultCloudinary = await cloudinary.uploader.upload(photoPath)
     fs.unlinkSync(photoPath)
     req.cloudinary_url = resultCloudinary.secure_url
     return next()
   } else {
-    console.log("JODER");
+    console.log("JODER")
     return res.json({ result: false, error: resultMove })
   }
-
 }
 
 module.exports = { upload }
