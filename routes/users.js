@@ -330,14 +330,6 @@ router.put("/", middlewareCheckToken, async (req, res, next) => {
   }
 })
 
-router.get("/allUsers", middlewareCheckToken, async (req, res) => {
-  try {
-    const users = await User.find().populate("dogs");
-    res.status(200).json(users);
-  } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateurs :", error);
-    res.status(500).json({ error: "Erreur serveur lors de la récupération des utilisateurs" });
-  }
-});
+
 
 module.exports = router
