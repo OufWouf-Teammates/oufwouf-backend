@@ -132,8 +132,6 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
   const { dogId } = req.params; // Utiliser dogId comme dans l'URL
 
-  console.log("Token reçu :", token); // Afficher le token pour vérifier qu'il est bien passé
-  console.log("ID du chien reçu :", dogId); // Afficher l'ID du chien reçu dans l'URL
   
   try {
     if (!token) {
@@ -142,7 +140,7 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
 
     // Vérification de l'utilisateur
     const user = await User.findOne({ token: token }).populate("dogs");
-    console.log("Utilisateur trouvé :", user); // Vérifier l'utilisateur
+
 
     if (!user) {
       return res.status(404).json({ result: false, error: "Utilisateur non trouvé" });
@@ -150,7 +148,7 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
 
     // Vérification de l'existence du chien
     const foundDog = user.dogs.find(dog => dog._id.toString() === dogId);  // Recherchez le chien avec le dogId
-    console.log("Chien trouvé :", foundDog); // Afficher le chien trouvé
+
 
     if (!foundDog) {
       return res.status(404).json({ result: false, error: "Chien non trouvé pour cet utilisateur" });
@@ -158,8 +156,7 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
 
     // Vérification de la présence du fichier image
     const uri = req.cloudinary_url; 
-    console.log(uri) // Assurez-vous que vous utilisez le bon nom de champ ici
-    console.log("Fichier reçu :", req.files); // Afficher le contenu de req.files pour vérifier que l'image est bien reçue
+
     if (!uri) {
       return res.status(400).json({ result: false, error: "Aucune image fournie" });
     }
@@ -170,7 +167,6 @@ router.put(`/modifier/:dogId`, middlewareCheckToken, upload, async (req, res) =>
       { uri: uri }, // Mettre à jour le champ `uri` avec l'URL de l'image
     );
 
-    console.log("Chien mis à jour :", updatedDog); // Afficher l'objet chien mis à jour
 
     if (!updatedDog) {
       return res.status(404).json({ result: false, error: "Chien non trouvé pour la mise à jour" });

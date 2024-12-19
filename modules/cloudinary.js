@@ -16,7 +16,7 @@ async function upload(req, res, next) {
     req.cloudinary_url = resultCloudinary.secure_url
     return next()
   } else {
-    console.log("JODER")
+
     return res.json({ result: false, error: resultMove })
   }
 }

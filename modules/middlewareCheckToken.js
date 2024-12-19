@@ -29,7 +29,6 @@ async function middlewareCheckToken(req, res, next) {
 
     // Si tout est valide, retourner une réponse ou passer au prochain middleware
     req.token = token
-    console.log("le token est bon")
 
     return next()
   } catch (error) {

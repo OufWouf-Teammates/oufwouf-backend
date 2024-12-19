@@ -311,7 +311,7 @@ router.get("/isBookmarked", middlewareCheckToken, async (req, res, next) => {
       return res.json({ result: true, isBookmarked })
     }
   } catch (error) {
-    console.log("CRASH")
+
     console.error(error)
     res.status(500).json({ result: false, error: "erreur serveur" })
   }

@@ -192,7 +192,7 @@ router.post(
       const idApple = verifiedData.sub
       const emailApple = verifiedData.email || null
 
-      console.log("Données vérifiées :", verifiedData)
+
 
       // Étape 2 : Recherche de l'utilisateur dans la base
       let user
@@ -208,7 +208,7 @@ router.post(
       // Étape 3 : L'utilisateur existe
       if (user) {
         if (!emailApple || user.email === emailApple) {
-          console.log("Utilisateur trouvé, connexion...")
+
           req.body.email = user.email
           return next()
         } else {
@@ -258,7 +258,7 @@ router.post(
       }
 
       if (signupData.result) {
-        console.log("Inscription réussie, connexion...")
+
         req.body.email = emailApple
         return next()
       } else {
