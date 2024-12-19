@@ -59,8 +59,8 @@ router.get("/dogName/:token", async (req, res) => {
   const { token } = req.params
   try {
     const dogName = await User.findOne({ token: token }).populate({
-      path: dogSlice,
-      select: name,
+      path: "dogs",
+      select: "name",
     })
     if (!dogName) {
       res.json({ result: false, message: "error user non trouvé" })
