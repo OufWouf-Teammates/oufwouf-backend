@@ -16,7 +16,7 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-// Helper pour générer le channelName
+// Utilitaire pour générer le nom de canal
 const getChannelName = (roomName) => `room-${roomName.replace(/\s+/g, '-').toLowerCase()}`;
 
 // Joindre un chat
@@ -26,7 +26,7 @@ router.put('/users/:username', async (req, res) => {
     const username = req.params.username;
 
     if (!roomName || !username) {
-      return res.status(400).json({ result: false, error: 'Nom de salle ou nom d\'utilisateur manquant.' });
+      return res.status(400).json({ result: false, error: "Nom de salle ou nom d'utilisateur manquant." });
     }
 
     const room = await Room.findOne({ name: roomName });
@@ -51,7 +51,7 @@ router.delete('/users/:username', async (req, res) => {
     const username = req.params.username;
 
     if (!roomName || !username) {
-      return res.status(400).json({ result: false, error: 'Nom de salle ou nom d\'utilisateur manquant.' });
+      return res.status(400).json({ result: false, error: "Nom de salle ou nom d'utilisateur manquant." });
     }
 
     const room = await Room.findOne({ name: roomName });
@@ -97,7 +97,7 @@ router.post('/message', async (req, res) => {
       const resultMove = await req.files.audio.mv(audioPath);
 
       if (!resultMove) {
-        const resultCloudinary = await cloudinary.uploader.upload(audioPath);
+        const resultCloudinary = await cloudinary.uploader.upload(audioPath, { resource_type: 'video' });
         message.url = resultCloudinary.secure_url;
         fs.unlinkSync(audioPath);
       } else {
@@ -109,6 +109,26 @@ router.post('/message', async (req, res) => {
     res.json({ result: true });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
+  }
+});
+
+// Récupérer le nom du chien à partir du token
+router.get('/dogName/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const user = await User.findOne({ token }).populate({
+      path: 'dogs',
+      select: 'name',
+    });
+
+    if (!user || !user.dogs || user.dogs.length === 0) {
+      return res.status(404).json({ result: false, error: 'Utilisateur ou chien introuvable.' });
+    }
+
+    const dogName = user.dogs[0].name; // Suppose qu'il y a un seul chien
+    res.json({ result: true, dogName });
+  } catch (error) {
+    res.status(500).json({ result: false, error: 'Erreur serveur.' });
   }
 });
 
