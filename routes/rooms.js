@@ -35,6 +35,7 @@ router.get("/", middlewareCheckToken, async (req, res) => {
   const { token } = req
 
   try {
+    const user = await User.findOne({ token: token })
     const roomId = req.query.room
     if (!roomId) {
       return res.status(400).json({
@@ -44,7 +45,7 @@ router.get("/", middlewareCheckToken, async (req, res) => {
     }
     const room = await Room.findOne({ _id: roomId }).populate("messages")
 
-    res.json({ result: true, messages: room.messages })
+    res.json({ result: true, messages: room.messages, userID: user._id })
   } catch (error) {
     console.error(error)
     res.status(500).json({ result: false, message: "erreur serveur" })

@@ -81,7 +81,7 @@ router.post("/addFriend/:id", async (req, res, next) => {
       })
 
       const newRoom = new Room({
-        name: [user1.dogs[0]?.name, user2.dogs[0]?.name],
+        name: `${user1.dogs[0]?.name} and ${user2.dogs[0]?.name}`,
         users: [user1._id, user2._id],
         messages: [],
       })
