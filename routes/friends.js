@@ -8,7 +8,7 @@ const { middlewareCheckToken } = require("../modules/middlewareCheckToken")
 const Friend = require("../models/friend")
 
 router.post("/request/:token", async (req, res, next) => {
-    const { token } = req.params;
+  const { token } = req.params
 
   try {
     if (!token) {
@@ -80,8 +80,10 @@ router.post("/addFriend/:id", async (req, res, next) => {
         populate: { path: "dogs", select: "name" },
       })
 
+      console.log("je suis la", user1, user2)
+
       const newRoom = new Room({
-        name: [user1.dogs[0].name, user2.dogs[0].name],
+        name: [user1.dogs[0]?.name, user2.dogs[0]?.name],
         users: [user1._id, user2._id],
         messages: [],
       })
@@ -110,7 +112,7 @@ router.get("/", middlewareCheckToken, async (req, res, next) => {
     if (!user) {
       return res.status(400).json({ result: false, error: "pas d'user trouvé" })
     }
-    return res.status(201).json({ friends: user.friendList });
+    return res.status(201).json({ friends: user.friendList })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ result: false, error: "Erreur serveur" })
