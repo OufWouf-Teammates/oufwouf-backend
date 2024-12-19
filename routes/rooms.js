@@ -31,14 +31,18 @@ router.post("/", middlewareCheckToken, findReceiver, async (req, res) => {
   }
 })
 
-router.get("/", middlewareCheckToken, findReceiver, async (req, res) => {
-  const { token, receiver } = req
+router.get("/", middlewareCheckToken, async (req, res) => {
+  const { token } = req
 
   try {
-    const user = await User.findOne({ token: token })
-    const room = await Room.findOne({
-      users: { $all: [user._id, receiver._id] },
-    }).populate("messages")
+    const roomId = req.query.room
+    if (!roomId) {
+      return res.status(400).json({
+        result: false,
+        message: "L'ID de la salle est requis.",
+      })
+    }
+    const room = await Room.findOne({ _id: roomId }).populate("messages")
 
     res.json({ result: true, messages: room.messages })
   } catch (error) {
