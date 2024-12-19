@@ -80,8 +80,6 @@ router.post("/addFriend/:id", async (req, res, next) => {
         populate: { path: "dogs", select: "name" },
       })
 
-      console.log("je suis la", user1, user2)
-
       const newRoom = new Room({
         name: [user1.dogs[0]?.name, user2.dogs[0]?.name],
         users: [user1._id, user2._id],
@@ -102,8 +100,8 @@ router.post("/addFriend/:id", async (req, res, next) => {
   }
 })
 
-router.get("/", middlewareCheckToken, async (req, res, next) => {
-  const { token } = req
+router.get("/allFriends/:token", async (req, res, next) => {
+  const { token } = req.params
   try {
     const user = await User.findOne({ token }).populate({
       path: "friendList",
