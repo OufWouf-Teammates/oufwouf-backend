@@ -34,7 +34,6 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
         .json({ result: false, error: "Données invalides" });
     }
 
-    console.log("je rentre dans la route");
 
     const data = JSON.parse(req.body.data);
     const uri = req.cloudinary_url;
@@ -48,7 +47,7 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
 
     const save = await newPic.save();
 
-    console.log(newPic);
+
 
     const update = await User.updateOne(
       { token: token },
@@ -64,10 +63,10 @@ router.post("/", middlewareCheckToken, upload, async (req, res, next) => {
 
 router.post("/description", async (req, res, next) => {
   try {
-    console.log("je rentre dans la route");
+
     const { uri, description } = req.body;
     if (!uri || !description) {
-      console.log("pas id");
+
       return res
         .status(400)
         .json({ result: false, error: "URI et description sont requis" });
@@ -75,14 +74,14 @@ router.post("/description", async (req, res, next) => {
 
     const picture = await Picture.findOne({ uri });
     if (!picture) {
-      console.log("pas trouvé");
+
       return res
         .status(404)
         .json({ result: false, error: "Photo non trouvée" });
     }
 
     picture.description = req.body.description;
-    console.log("nouvelle des ");
+
 
     const updatedPicture = await picture.save();
 
