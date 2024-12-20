@@ -1,6 +1,8 @@
 var express = require("express")
 var router = express.Router()
 const User = require("../models/user")
+const Message = require("../models/message")
+const Room = require("../models/room")
 
 const Pusher = require("pusher")
 const pusher = new Pusher({
@@ -14,7 +16,6 @@ const pusher = new Pusher({
 const cloudinary = require("cloudinary").v2
 const uniqid = require("uniqid")
 const fs = require("fs")
-const { dogSlice } = require("../../oufwouf-frontend/reducers/dog")
 
 // Join chat
 router.put("/users/:username", (req, res) => {
@@ -51,6 +52,12 @@ router.post("/message", async (req, res) => {
   }
 
   pusher.trigger("chat", "message", message)
+
+  const newMessage = new Message({
+    ...message,
+  })
+
+  const save = await newMessage.save()
 
   res.json({ result: true })
 })
