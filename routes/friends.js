@@ -71,17 +71,23 @@ router.post("/addFriend/:id", async (req, res, next) => {
       //Create room
 
       const user1 = await User.findOne({ _id: request.from }).populate({
-        path: "friendList",
-        populate: { path: "dogs", select: "name" },
-      })
-
+        path: 'dogs', 
+        select: 'name' 
+      });
+      
       const user2 = await User.findOne({ _id: request.to }).populate({
-        path: "friendList",
-        populate: { path: "dogs", select: "name" },
-      })
+        path: 'dogs',  
+        select: 'name' 
+      });
+      
+
+      const dog1Name = user1.dogs.length > 0 ? user1.dogs[0].name : "Dog1";
+      const dog2Name = user2.dogs.length > 0 ? user2.dogs[0].name : "Dog2";
+
+      const roomName = `${dog1Name} and ${dog2Name}`
 
       const newRoom = new Room({
-        name: `${user1.dogs[0]?.name} and ${user2.dogs[0]?.name}`,
+        name: roomName, 
         users: [user1._id, user2._id],
         messages: [],
       })
