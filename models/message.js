@@ -6,6 +6,7 @@ const messageSchema = new mongoose.Schema({
   createdAt: Date,
   type: String,
   roomName: String,
+  url: String,
 })
 
 const Message = mongoose.model("Message", messageSchema)

@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const User = require("../models/user")
 const Room = require("../models/room")
+const Message = require("../models/message")
 const Pusher = require("pusher")
 const cloudinary = require("cloudinary").v2
 const uniqid = require("uniqid")
@@ -128,8 +129,25 @@ router.post("/message", async (req, res) => {
         })
       }
     }
+    console.log(message)
 
     pusher.trigger(channelName, "message", message)
+    const newMessage = new Message({
+      ...message,
+    })
+
+    const save = await newMessage.save()
+
+    const saveInRoom = await Room.updateOne(
+      { name: channelName },
+      { $addToSet: { messages: save._id } }
+    )
+    if (!saveInRoom) {
+      return res
+        .status(404)
+        .json({ result: false, message: "Salle non trouvée" })
+    }
+
     res.json({ result: true })
   } catch (error) {
     res.status(500).json({ result: false, error: error.message })
@@ -155,6 +173,36 @@ router.get("/dogName/:token", async (req, res) => {
     res.json({ result: true, dogName })
   } catch (error) {
     res.status(500).json({ result: false, error: "Erreur serveur." })
+  }
+})
+
+router.get("/roomName/:name", async (req, res) => {
+  const { name } = req.params
+
+  try {
+    if (!name) {
+      return res
+        .status(400)
+        .json({ result: false, message: "Nom de la salle manquant" })
+    }
+
+    const messages = await Message.find({
+      roomName: name,
+    })
+
+    if (messages.length === 0) {
+      return res.json({
+        result: true,
+        messages: [],
+        message: "Aucun message trouvé",
+        roomName: name,
+      })
+    }
+
+    res.json({ result: true, messages: messages, roomName: name })
+  } catch (error) {
+    console.error("Erreur lors de la récupération des messages :", error)
+    res.status(500).json({ result: false, message: "Erreur serveur" })
   }
 })
 
