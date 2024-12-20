@@ -42,10 +42,8 @@ router.put("/users/:username", async (req, res) => {
         .json({ result: false, error: "Salle introuvable." })
     }
     const channelName = getChannelName(room.name)
-    console.log("pusher", pusher)
 
     pusher.trigger(channelName, "join", { username })
-    console.log("after Pusher")
     res.json({ result: true })
   } catch (error) {
     res.status(500).json({ result: false, error: error.message })
@@ -129,7 +127,6 @@ router.post("/message", async (req, res) => {
         })
       }
     }
-    console.log(message)
 
     pusher.trigger(channelName, "message", message)
     const newMessage = new Message({
